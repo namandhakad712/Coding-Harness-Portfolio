@@ -3,237 +3,110 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Naman Dhakad — Web Developer × Interaction Craft</title>
-<meta name="description" content="Naman Dhakad — web developer from India. Interaction craft, not just shipping features. 5 shipped projects: Smart Mailto, Rankify PDF2CBT, Lume, Felearn AI, Infinite Word Search." />
+<title>Naman Dhakad — Terminal</title>
+<meta name="description" content="Naman Dhakad — web developer from India. A terminal portfolio: type / to explore five shipped projects, the stack, and how to get in touch." />
 <meta name="author" content="Naman Dhakad" />
-<meta property="og:title" content="Naman Dhakad — Web Developer × Interaction Craft" />
-<meta property="og:description" content="I build digital experiences that feel alive. Every interaction is intentional — code as a medium for art." />
-<meta property="og:type" content="website" />
-<meta name="theme-color" content="#08080a" />
+<meta name="theme-color" content="#0a0a0b" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="./styles.css" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&gt;</text></svg>" />
 </head>
-<body>
+<body data-theme="harness" data-state="idle">
 
-<!-- ══════════ TOP CHROME ══════════ -->
 <header class="topbar">
   <span class="topbar__l">✕ Naman Dhakad</span>
-  <span class="topbar__c">coding-harness-portfolio — main</span>
-  <span class="topbar__r">⋯</span>
+  <span class="topbar__c">~/portfolio — main</span>
+  <button class="topbar__help" id="helpBtn" title="How to use this site (?)">? help</button>
 </header>
 
-<!-- ══════════ HERO / PROMPT ══════════ -->
-<section class="hero" id="top">
-  <canvas id="mascot" class="mascot" aria-label="Interactive 3D ASCII object — move your cursor"></canvas>
+<main class="term">
 
-  <h1 class="hero__q">What can I do for you?</h1>
+  <!-- transcript (active session) -->
+  <div class="transcript" id="transcript" aria-live="polite" aria-label="Session transcript"></div>
 
-  <p class="hero__hint">Use / for slash commands, @ for file mentions, Ctrl+P for menu</p>
+  <!-- idle hero -->
+  <div class="idle" id="idle">
+    <canvas id="mascot" class="mascot" aria-label="Interactive 3D ASCII mascot — move your cursor"></canvas>
+    <h1 class="idle__q">What can I do for you?</h1>
+    <p class="idle__hint">Type / for commands, @ to mention a file, Ctrl+P for the list</p>
+    <div class="chips" id="chips">
+      <button class="chip" data-cmd="/work">/work</button>
+      <button class="chip" data-cmd="/craft">/craft</button>
+      <button class="chip" data-cmd="/about">/about</button>
+      <button class="chip" data-cmd="/contact">/contact</button>
+      <button class="chip" data-cmd="/help">/help</button>
+    </div>
+  </div>
 
+  <!-- prompt -->
   <div class="prompt" id="prompt">
-    <span class="prompt__chevron">&gt;</span>
+    <span class="prompt__chevron" id="chev">&gt;</span>
     <input id="cmd" class="prompt__input" type="text" autocomplete="off" spellcheck="false"
            placeholder="What can I do for you?" aria-label="Command input" />
     <div class="menu" id="menu" role="listbox" hidden></div>
   </div>
 
-  <div class="status">
+  <!-- status bar -->
+  <div class="status" id="status">
     <div class="status__row">
-      <span class="status__model">Coding Harness (xhigh)<span class="status__mask"></span> (0) | $0.00</span>
+      <span class="status__session">naman<span class="dim">@portfolio</span> <span class="dim">— interactive demo, nothing is sent anywhere</span></span>
       <span class="status__toggle" id="toggle">
-        <span class="opt" data-mode="plan">○ Plan</span>
-        <span class="opt is-on" data-mode="act">● Act</span>
+        <span class="opt" data-mode="plan" role="radio">○ Plan</span>
+        <span class="opt is-on" data-mode="act" role="radio">● Act</span>
         <span class="status__key">(Tab)</span>
       </span>
     </div>
     <div class="status__row status__row--path">
-      <span>~/Coding-Harness-Portfolio</span>
-      <span class="status__diff"><b class="add">5 works</b> <b class="del">+100% −0%</b></span>
+      <span>~/portfolio</span>
+      <span class="status__git dim">5 projects · open to work</span>
     </div>
     <div class="status__row">
-      <span class="status__auto">⏵⏵ Auto-approve all enabled <span class="dim">(Shift+Tab)</span></span>
+      <span class="status__auto" id="autoBtn" role="button" tabindex="0">⏵⏵ Answers stream automatically <span class="dim">(Shift+Tab)</span></span>
     </div>
   </div>
-</section>
 
-<!-- ══════════ WORK ══════════ -->
-<section class="sec" id="work">
-  <div class="seclabel"><span class="dot"></span> WORK — 05 SHIPPED / 2023—2026</div>
-  <h2 class="sectitle">The Arsenal</h2>
-  <p class="seclede">Five battles, not demos. Top 2 are new — zero-dep webmail picker and light PDF→CBT. All capabilities, awwwards craft.</p>
+</main>
 
-  <div class="grid">
+<!-- beginner guide -->
+<div class="guide" id="guide" hidden>
+  <div class="guide__box" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <div class="guide__hd">
+      <span class="guide__badge">FIRST TIME HERE?</span>
+      <button class="guide__x" id="guideX" aria-label="Close guide">✕</button>
+    </div>
+    <h2 id="guideTitle">This portfolio is a small terminal</h2>
+    <p class="guide__lede">Everything happens in this one window — like chatting with a coding assistant, but the answers are about me and my work. Nothing you type is sent anywhere; it all runs in your browser.</p>
 
-    <article class="card reveal">
-      <div class="card__media"><img src="./assets/projects/smart-mailto.webp" alt="Smart Mailto" loading="lazy" /></div>
-      <div class="card__body">
-        <div class="card__meta"><span class="idx">01</span><span>2026 — Zero-Dep • 51 webmails</span></div>
-        <h3>Smart Mailto</h3>
-        <p class="card__tech">TypeScript — &lt;8KB — 90% coverage</p>
-        <p>Replace broken <code>mailto:</code> links with a geo-aware webmail picker. 51 webmails, zero deps, privacy 100%. The tiny fix that saves every contact form.</p>
-        <div class="card__links">
-          <a href="https://github.com/namandhakad712/smart-mailto" target="_blank" rel="noopener">GH — CODE</a>
-          <a href="https://smart-mailto.vercel.app" target="_blank" rel="noopener" class="primary">LIVE DEMO — ↗</a>
-        </div>
-      </div>
-    </article>
-
-    <article class="card reveal">
-      <div class="card__media"><img src="./assets/projects/rankify.webp" alt="Rankify PDF2CBT" loading="lazy" /></div>
-      <div class="card__body">
-        <div class="card__meta"><span class="idx">02</span><span>2026 — Open Next.js • Cloudflare Worker</span></div>
-        <h3>Rankify PDF2CBT</h3>
-        <p class="card__tech">Vite — Vue 3 — Rolldown — Web Light</p>
-        <p>The light, open PDF → CBT wrapper. Any question-paper PDF becomes a real CBT in your browser. Timed, palette 5 states, autosave. For every exam, every subject.</p>
-        <div class="card__links">
-          <a href="https://github.com/namandhakad712/Rankify-PDF2CBT" target="_blank" rel="noopener">GH — CODE</a>
-          <a href="https://rankify-pdf2cbt.vercel.app" target="_blank" rel="noopener" class="primary">LIVE DEMO — ↗</a>
-        </div>
-      </div>
-    </article>
-
-    <article class="card reveal">
-      <div class="card__media"><img src="./assets/projects/lume.webp" alt="Lume Study Assistant" loading="lazy" /></div>
-      <div class="card__body">
-        <div class="card__meta"><span class="idx">03</span><span>2026 — AI Edge • Tuya T5AI-Core</span></div>
-        <h3>Lume Study Assistant</h3>
-        <p class="card__tech">TypeScript — Tuya IoT — Voice AI</p>
-        <p>Hands-free AI study buddy on Tuya T5AI-Core. Double-knock wake, voice chat, focus timer, mini-app panel. Exam prep without touching a screen.</p>
-        <div class="card__links">
-          <a href="https://github.com/namandhakad712/lume-study-assistant" target="_blank" rel="noopener">GH — CODE</a>
-          <a href="https://github.com/namandhakad712/lume-study-assistant" target="_blank" rel="noopener" class="primary">LIVE DEMO — ↗</a>
-        </div>
-      </div>
-    </article>
-
-    <article class="card reveal">
-      <div class="card__media"><img src="./assets/projects/felearn.webp" alt="Felearn AI" loading="lazy" /></div>
-      <div class="card__body">
-        <div class="card__meta"><span class="idx">04</span><span>2024 — AI • Education</span></div>
-        <h3>Felearn AI</h3>
-        <p class="card__tech">React — AI — Storytelling — Node.js</p>
-        <p>An educational platform that uses AI to transform complex concepts into engaging cat-themed stories and visuals.</p>
-        <div class="card__links">
-          <a href="https://github.com/namandhakad712/felearn" target="_blank" rel="noopener">GH — CODE</a>
-          <a href="https://felearn.vercel.app" target="_blank" rel="noopener" class="primary">LIVE DEMO — ↗</a>
-        </div>
-      </div>
-    </article>
-
-    <article class="card reveal">
-      <div class="card__media"><img src="./assets/projects/wordsearch.webp" alt="Infinite Word Search" loading="lazy" /></div>
-      <div class="card__body">
-        <div class="card__meta"><span class="idx">05</span><span>2023 — AI • Dictionary</span></div>
-        <h3>Infinite Word Search</h3>
-        <p class="card__tech">Next.js — React — TypeScript — AI</p>
-        <p>Search deep &amp; deep into the description of any word, powered by AI. An infinite AI generated dictionary.</p>
-        <div class="card__links">
-          <a href="https://github.com/namandhakad712/Infinte-Word-Search" target="_blank" rel="noopener">GH — CODE</a>
-          <a href="https://infinte-word-search.vercel.app" target="_blank" rel="noopener" class="primary">LIVE DEMO — ↗</a>
-        </div>
-      </div>
-    </article>
-
-  </div>
-</section>
-
-<!-- ══════════ CRAFT ══════════ -->
-<section class="sec" id="craft">
-  <div class="seclabel"><span class="dot"></span> CRAFT — 03 GROUPS / NO BUZZWORD CLOUD</div>
-  <h2 class="sectitle">The craft</h2>
-  <p class="seclede">Tools are opinions. These are the ones I’ve earned — not collected. If it doesn’t help ship better work, it doesn’t stay.</p>
-
-  <div class="groups">
-    <div class="group reveal">
-      <div class="group__hd"><span class="group__n">01</span><div><span class="group__k">Where the work is felt</span><h3>Frontend</h3></div></div>
-      <ul>
-        <li><img src="./assets/tech/react.webp" alt="" loading="lazy"><span class="n">React</span><span class="d">Daily — systems, not pages</span></li>
-        <li><img src="./assets/tech/nextjs.webp" alt="" loading="lazy"><span class="n">Next.js</span><span class="d">App Router, RSC, edge</span></li>
-        <li><img src="./assets/tech/typescript.webp" alt="" loading="lazy"><span class="n">TypeScript</span><span class="d">Strict, safe — &lt;8KB core</span></li>
-        <li><img src="./assets/tech/vue.webp" alt="" loading="lazy"><span class="n">Vue 3 / Nuxt</span><span class="d">Rankify — Vite + Rolldown</span></li>
-        <li><img src="./assets/tech/tailwind.webp" alt="" loading="lazy"><span class="n">Tailwind</span><span class="d">Design tokens → utility</span></li>
-        <li><img src="./assets/tech/gsap.webp" alt="" loading="lazy"><span class="n">GSAP</span><span class="d">Scroll, motion, craft</span></li>
-      </ul>
+    <div class="demo" aria-hidden="true">
+      <div class="demo__bar"><span class="demo__dot"></span> demo — watch this</div>
+      <div class="demo__screen" id="demoScreen"></div>
     </div>
 
-    <div class="group reveal">
-      <div class="group__hd"><span class="group__n">02</span><div><span class="group__k">Where the work holds</span><h3>Backend / Edge</h3></div></div>
-      <ul>
-        <li><img src="./assets/tech/nodejs.webp" alt="" loading="lazy"><span class="n">Node.js</span><span class="d">APIs that don’t leak</span></li>
-        <li><img src="./assets/tech/appwrite.webp" alt="" loading="lazy"><span class="n">Appwrite</span><span class="d">Auth, DB, storage</span></li>
-        <li><img src="./assets/tech/supabase.webp" alt="" loading="lazy"><span class="n">Supabase</span><span class="d">Postgres — realtime, auth</span></li>
-        <li><img src="./assets/tech/cloudflare.webp" alt="" loading="lazy"><span class="n">Cloudflare Workers</span><span class="d">Rankify — edge light</span></li>
-        <li><img src="./assets/tech/python.webp" alt="" loading="lazy"><span class="n">Python</span><span class="d">AI edge — Lume / Deepfake</span></li>
-        <li><img src="./assets/tech/tuya.webp" alt="" loading="lazy"><span class="n">Tuya IoT</span><span class="d">Lume T5AI-Core — voice, knock</span></li>
-      </ul>
-    </div>
+    <ul class="guide__list">
+      <li><b>Type <i>/</i></b> or click a chip below the mascot to run a command.</li>
+      <li><b>Type <i>@</i></b> to mention a file, the way you would in a chat.</li>
+      <li><b>Press <i>Tab</i></b> to switch between <i>Plan</i> (just talk) and <i>Act</i> (do things).</li>
+      <li><b>Press <i>Esc</i></b> to stop an answer mid-way. <b><i>?</i></b> reopens this guide.</li>
+      <li>Move your mouse over the mascot — it follows you around.</li>
+    </ul>
 
-    <div class="group reveal">
-      <div class="group__hd"><span class="group__n">03</span><div><span class="group__k">Where the work ships</span><h3>Tooling</h3></div></div>
-      <ul>
-        <li><img src="./assets/tech/git.webp" alt="" loading="lazy"><span class="n">Git</span><span class="d">Clean history, not just push</span></li>
-        <li><img src="./assets/tech/vercel.webp" alt="" loading="lazy"><span class="n">Vercel</span><span class="d">Preview → production</span></li>
-        <li><img src="./assets/tech/vscode.webp" alt="" loading="lazy"><span class="n">VS Code</span><span class="d">Editor — craft</span></li>
-        <li><img src="./assets/tech/javascript.webp" alt="" loading="lazy"><span class="n">Zero-dep</span><span class="d">Smart Mailto — 51 webmails</span></li>
-      </ul>
+    <div class="guide__ft">
+      <label class="guide__remember"><input type="checkbox" id="guideRemember" checked /> do not show again</label>
+      <div class="guide__btns">
+        <button class="gbtn" id="guideClose">Close</button>
+        <button class="gbtn gbtn--go" id="guideGo">Show me /work →</button>
+      </div>
     </div>
   </div>
-</section>
+</div>
 
-<!-- ══════════ ABOUT ══════════ -->
-<section class="sec" id="about">
-  <div class="seclabel"><span class="dot"></span> ABOUT — THE PERSON BEHIND THE CODEX</div>
-  <h2 class="sectitle">In his own words</h2>
-
-  <blockquote class="quote reveal">“I build for feel — the micro-interactions that make someone stay, not just visit.”</blockquote>
-
-  <div class="about">
-    <div class="about__bio reveal">
-      <div class="who"><span class="av">ND</span><div><b>Naman Dhakad</b><span>Web Developer — India</span></div></div>
-      <p>I’m a web developer focused on interaction and craft. I like work that’s fast, tactile, and respectful of the person using it. No dark patterns, no bloat, no “AI did it.”</p>
-      <p>I’ve shipped products with Vue, React, Next, and plain old good HTML — from exam prep for thousands to small tools that make birthdays feel personal.</p>
-      <ul class="ticks">
-        <li>→ Based in India, working globally</li>
-        <li>→ Obsessed with type, motion, and performance</li>
-        <li>→ Available for freelance &amp; product work</li>
-      </ul>
-    </div>
-
-    <div class="about__time reveal">
-      <div class="tl">
-        <div class="tl__i"><span class="tl__y">2024 — Now</span><p>Building Rankify &amp; Felearn AI — AI products that actually teach.</p></div>
-        <div class="tl__i"><span class="tl__y">2023</span><p>Wish One, T-Share, Infinite — small, sharp tools. Each one taught me constraint.</p></div>
-        <div class="tl__i"><span class="tl__y">2022</span><p>Found the craft: type + motion + systems. Stopped chasing stacks.</p></div>
-        <div class="tl__i"><span class="tl__y">Before</span><p>Curiosity → code → people. The loop hasn’t changed.</p></div>
-      </div>
-      <p class="avail"><span class="pulse"></span> Available for freelance and product work — remote worldwide.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════ CONTACT ══════════ -->
-<section class="sec" id="contact">
-  <div class="seclabel"><span class="dot"></span> CONTACT — REPLY IN &lt; 24H — NO BOT</div>
-  <h2 class="sectitle">Say hello</h2>
-  <p class="seclede">Have an idea, a product, or just a weird interaction you want to build? I read every message.</p>
-
-  <div class="contacts reveal">
-    <a class="cc" href="mailto:hey@naman.is-a.dev"><span class="cc__k">→</span><span class="cc__v">hey@naman.is-a.dev</span></a>
-    <a class="cc" href="https://github.com/namandhakad712" target="_blank" rel="noopener"><span class="cc__k">→</span><span class="cc__v">GitHub — @namandhakad712</span></a>
-    <a class="cc" href="https://linkedin.com/in/namandhakad/" target="_blank" rel="noopener"><span class="cc__k">→</span><span class="cc__v">LinkedIn — namandhakad</span></a>
-  </div>
-</section>
-
-<footer class="foot">
-  <span>© 2026 NAMAN DHAKAD</span>
-  <span class="foot__m">CRAFT OVER SPEED — CODE WITH SOUL</span>
-  <span>INDIA — REMOTE WORLDWIDE</span>
-</footer>
+<!-- toast -->
+<div class="toast" id="toast" hidden><span class="spin">⠋</span> <span id="toastText">One moment…</span></div>
 
 <script src="./ascii3d.js"></script>
-<script src="./main.js"></script>
+<script src="./data.js"></script>
+<script src="./tui.js"></script>
 </body>
 </html>

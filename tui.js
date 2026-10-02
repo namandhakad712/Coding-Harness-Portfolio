@@ -1,0 +1,773 @@
+/* ══════════════════════════════════════════════════════════════
+   tui.js — the harness
+   Slash menu · @ mentions · Ctrl+P palette · Plan/Act · auto-answer
+   toggle · thinking (open by default, auto-collapses, click to toggle)
+   · streaming replies · tool calls with collapsible output · errors
+   · project cards with screenshots · beginner guide with live demo.
+   ══════════════════════════════════════════════════════════════ */
+"use strict";
+(function () {
+
+/* ── refs ─────────────────────────────────────────────── */
+const $ = (id) => document.getElementById(id);
+const body = document.body;
+const input = $("cmd"), menu = $("menu"), transcript = $("transcript");
+const toggle = $("toggle"), autoBtn = $("autoBtn");
+const guide = $("guide"), toast = $("toast"), toastText = $("toastText"), toastSpin = toast.querySelector(".spin");
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/* ── state ────────────────────────────────────────────── */
+const S = {
+  mode: "act",
+  autoAnswer: true,
+  history: [], histIdx: -1,
+  run: null,
+  menuItems: [], menuIdx: -1, menuKind: null,
+  thinking: []            // live thinking blocks of the current run
+};
+
+/* ── commands ─────────────────────────────────────────── */
+const COMMANDS = [
+  { cmd: "/work",    desc: "See the five shipped projects",  run: runWork },
+  { cmd: "/craft",   desc: "The tools I actually use",       run: runCraft },
+  { cmd: "/about",   desc: "Who is behind the code",         run: runAbout },
+  { cmd: "/contact", desc: "How to reach me",                run: runContact },
+  { cmd: "/help",    desc: "How this terminal works",        run: runHelp },
+  { cmd: "/theme",   desc: "Change the colour theme",        run: runTheme },
+  { cmd: "/history", desc: "Everything you asked so far",    run: runHistory },
+  { cmd: "/undo",    desc: "Step back one answer",           run: runUndo },
+  { cmd: "/clear",   desc: "Start a fresh session",          run: () => newSession() },
+];
+
+const FILES = [
+  "index.html", "styles.css", "tui.js", "ascii3d.js", "data.js",
+  "assets/projects/smart-mailto.webp", "assets/tech/react.webp", ".gitignore"
+];
+
+/* friendly phrases shown while "thinking" */
+const THINK_WORDS = [
+  "Wandering through the code…",
+  "Gathering the loose threads…",
+  "Sharpening the wording…",
+  "Lining up the good parts…",
+  "Almost ready…",
+  "One more pass, then I'll answer…",
+  "Polishing the last few words…"
+];
+
+/* ══════════════════════════════════════════════════════
+   TRANSCRIPT PRIMITIVES
+   ══════════════════════════════════════════════════════ */
+function toActive() { body.dataset.state = "active"; }
+function pin() { transcript.scrollTop = transcript.scrollHeight; }
+
+function echo(text) {
+  const d = document.createElement("div");
+  d.className = "row row--echo";
+  d.innerHTML = '<span class="chev">›</span> ' + esc(text);
+  transcript.appendChild(d); pin();
+}
+
+function errLine(text) {
+  const d = document.createElement("div");
+  d.className = "row row--err";
+  d.innerHTML = '<span class="mk">✳</span> ' + esc(text);
+  transcript.appendChild(d); pin();
+}
+
+/* Thinking block — STARTS OPEN, auto-collapses when the full reply
+   has arrived, and stays clickable so the reader can toggle it. */
+function thinking(seed) {
+  const d = document.createElement("div");
+  d.className = "think";
+  let text = seed || "";
+  let expanded = true;              // open by default
+  let finished = false;
+  let live = true;
+
+  const frames = ["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"];
+  let fi = 0, wordIdx = 0, wordTimer = null, spinTimer = null;
+  const startWords = setTimeout(() => {                       // pretty words kick in
+    if (!live) return;
+    wordTimer = setInterval(() => {
+      if (!live) return;
+      wordIdx = (wordIdx + 1) % THINK_WORDS.length;
+      const w = d.querySelector(".think__word");
+      if (w) { w.style.opacity = "0"; setTimeout(() => { if (w.isConnected) { w.textContent = THINK_WORDS[wordIdx]; w.style.opacity = "1"; } }, 160); }
+    }, 1500);
+  }, 900);
+
+  spinTimer = setInterval(() => {
+    if (!live) return;
+    fi = (fi + 1) % frames.length;
+    const sp = d.querySelector(".spin");
+    if (sp) sp.textContent = frames[fi];
+  }, 90);
+
+  function paint() {
+    if (!text) return;
+    if (expanded) {
+      d.innerHTML =
+        '<span class="think__hd">▼ Thinking:</span>' +
+        '<div class="think__body">  ' + esc(text) + "</div>" +
+        '<span class="think__hint">click to collapse this thought</span>';
+    } else {
+      d.innerHTML =
+        '<span class="think__arrow">▶</span>' +
+        '<span class="think__inline">Thinking: ' + esc(text) + "</span>" +
+        '<span class="think__hint">click to read the full thought</span>';
+    }
+  }
+
+  function stopTimers() {
+    live = false;
+    clearInterval(spinTimer); clearInterval(wordTimer); clearTimeout(startWords);
+  }
+
+  const handle = {
+    el: d,
+    get cancelled() { return d.dataset.cancelled === "1"; },
+    /* stop the spinner, keep it OPEN — the runner collapses it later */
+    hold(t) {
+      stopTimers();
+      if (t != null) text = t;
+      if (d.dataset.cancelled === "1") {
+        d.innerHTML = '<span class="think__inline" style="color:var(--red)">✳ Cancelled</span>';
+        return;
+      }
+      if (!text) { d.innerHTML = '<span class="think__inline" style="color:var(--dimmer)">✳ (no thought needed)</span>'; finished = true; return; }
+      paint(); finished = true;
+    },
+    /* auto-collapse — used once the whole reply has streamed in */
+    collapse() {
+      if (d.dataset.cancelled === "1" || !finished || !text) return;
+      if (d.dataset.userToggled === "1") return;    // respect a manual toggle
+      expanded = false; paint();
+    },
+    /* user click anywhere on the block toggles it */
+    bind() {
+      d.onclick = () => {
+        expanded = !expanded;
+        d.dataset.userToggled = "1";
+        paint();
+      };
+    },
+    set(t) { text = t; if (!live && finished) paint(); },
+    get text() { return text; }
+  };
+  d.innerHTML = '<span class="think__live"><span class="spin">⠋</span> Thinking… <span class="esc">(esc to cancel)</span> <span class="think__word" style="transition:opacity .2s;color:var(--dimmer)"></span></span>';
+  d.onclick = () => {};   // live blocks ignore clicks
+  S.thinking.push(handle);
+  transcript.appendChild(d); pin();
+  return handle;
+}
+
+/* tool call with collapsible output */
+function toolCall(name, args, lines) {
+  const wrap = document.createElement("div");
+  wrap.className = "tool";
+  wrap.innerHTML = '<span class="tool__name">' + esc(name) + '</span><span class="tool__args">' + esc(args) + "</span>";
+  transcript.appendChild(wrap); pin();
+
+  const out = document.createElement("div");
+  out.className = "tool__out";
+  wrap.appendChild(out);
+
+  const n = lines.length;
+  let open = n <= 4;
+
+  function paintOut() {
+    if (open) {
+      out.innerHTML = lines.map((l) =>
+        '<div class="tool__line"><span class="tool__bracket">⌐</span> ' + esc(l || " ") + "</div>").join("");
+    } else {
+      out.innerHTML =
+        '<div class="tool__line"><span class="tool__bracket">⌐</span> ' + esc(lines[0] || " ") + "</div>" +
+        '<div class="tool__more">  ... ' + n + " more lines — click to expand</div>";
+    }
+    pin();
+  }
+  paintOut();
+  out.onclick = (e) => { e.stopPropagation(); open = !open; paintOut(); };
+  return { expand() { if (!open) { open = true; paintOut(); } } };
+}
+
+/* assistant text — streams char by char */
+async function streamText(run, text) {
+  const d = document.createElement("div");
+  d.className = "row row--out";
+  d.innerHTML = '<span class="mk">✳</span> <span class="tx"></span>';
+  transcript.appendChild(d);
+  const tx = d.querySelector(".tx");
+  let i = 0;
+  const step = Math.max(1, Math.round(text.length / 110));
+  while (i < text.length) {
+    if (run.cancelled) break;
+    i = Math.min(text.length, i + step);
+    tx.innerHTML = linkify(text.slice(0, i));
+    pin();
+    await sleep(15);
+  }
+  tx.innerHTML = linkify(run.cancelled ? text.slice(0, i) + " ⏹" : text);
+  pin();
+}
+
+function linkify(s) {
+  return esc(s).replace(/(https?:\/\/[^\s<"]+)/g, (m) => '<a href="' + m + '" target="_blank" rel="noopener">' + m + "</a>");
+}
+
+/* code / markdown block — streams line by line */
+async function streamCode(run, code) {
+  const pre = document.createElement("div");
+  pre.className = "code";
+  transcript.appendChild(pre);
+  const lines = code.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    if (run.cancelled) break;
+    const row = document.createElement("div");
+    row.className = "cl";
+    row.innerHTML = hl(lines[i]) || "&nbsp;";
+    pre.appendChild(row);
+    pin();
+    await sleep(30);
+  }
+  if (run.cancelled) {
+    const row = document.createElement("div");
+    row.className = "cl";
+    row.innerHTML = '<span class="tk-c">// ⏹ stopped</span>';
+    pre.appendChild(row);
+  }
+  pin();
+}
+
+function hl(line) {
+  let s = esc(line);
+  if (/^\s*(\/\/|#)/.test(line)) return '<span class="tk-c">' + s + "</span>";
+  s = s.replace(/(&quot;[^&]*?&quot;|"[^"]*?")/g, '<span class="tk-s">$1</span>');
+  s = s.replace(/\b(import|export|const|let|var|function|return|type|interface|from|await|async|new|default|true|false|null)\b/g, '<span class="tk-k">$1</span>');
+  s = s.replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="tk-n">$1</span>');
+  s = s.replace(/([A-Za-z_$][\w$]*)(\()/g, '<span class="tk-f">$1</span>$2');
+  return s;
+}
+
+function panel(html, hd) {
+  const d = document.createElement("div");
+  d.className = "panel";
+  d.innerHTML = (hd ? '<div class="panel__hd">' + esc(hd) + "</div>" : "") + html;
+  transcript.appendChild(d); pin();
+  return d;
+}
+
+/* project card — plain-English copy + real screenshot */
+function projectCard(p, i) {
+  const d = document.createElement("div");
+  d.className = "proj";
+  d.innerHTML =
+    '<div class="proj__hd"><span class="num">' + String(i + 1).padStart(2, "0") + "</span>" +
+    "<b>" + esc(p.title) + '</b><span class="yr">' + p.year + "</span>" +
+    '<span class="tags">' + esc(p.tags) + "</span></div>" +
+    '<img class="proj__img" alt="' + esc(p.title) + ' screenshot" loading="lazy" src="' + p.img + '" />' +
+    '<p class="proj__txt">' + esc(p.blurb) + "</p>" +
+    '<div class="proj__stack">↳ ' + esc(p.stack) + "</div>" +
+    '<div class="proj__links"><a class="hot" href="' + p.live + '" target="_blank" rel="noopener">live demo ↗</a>' +
+    '<a href="' + p.repo + '" target="_blank" rel="noopener">source code</a></div>';
+  transcript.appendChild(d);
+  const img = d.querySelector(".proj__img");
+  img.addEventListener("load", () => { img.classList.add("in"); pin(); });
+  if (img.complete) img.classList.add("in");
+  pin();
+  return d;
+}
+
+/* ══════════════════════════════════════════════════════
+   RUNNER
+   ══════════════════════════════════════════════════════ */
+function newRun() {
+  if (S.run) S.run.cancelled = true;
+  S.run = { cancelled: false };
+  S.thinking = [];
+  return S.run;
+}
+
+/* ══════════════════════════════════════════════════════
+   COMMANDS  (plain-English answers throughout)
+   ══════════════════════════════════════════════════════ */
+
+async function runWork(run) {
+  const th = thinking("You want to see real work. I'll pull the project list and lay out each one with its screenshot.");
+  await sleep(760); if (run.cancelled) return th.hold();
+  th.set("Five projects, newest first — Smart Mailto and Rankify are the recent ones.");
+  await sleep(700); if (run.cancelled) return th.hold();
+  th.hold("Five shipped projects, 2023 to 2026. Writing them out now.");
+  await sleep(240); if (run.cancelled) return;
+
+  const t = toolCall("read", "data.js", ["5 projects · images in ./assets/projects/", "copy rewritten in plain English"]);
+  await sleep(560); if (run.cancelled) return t.expand();
+  t.expand();
+
+  await streamText(run,
+    "Here is the work — five things I actually built and shipped, not demos. " +
+    "Each card has a screenshot, a plain description, and links to the live version and the source.");
+  if (run.cancelled) return;
+
+  for (let i = 0; i < PROJECTS.length; i++) {
+    if (run.cancelled) return;
+    projectCard(PROJECTS[i], i);
+    await sleep(420);
+  }
+}
+
+async function runCraft(run) {
+  const th = thinking("Load the stack and explain each tool the way I'd explain it to a friend.");
+  await sleep(740); if (run.cancelled) return th.hold();
+  th.set("Three groups — what the work feels like, what holds it up, and what ships it.");
+  await sleep(640); if (run.cancelled) return th.hold();
+  th.hold("Here's the stack, in plain words instead of buzzwords.");
+  await sleep(220); if (run.cancelled) return;
+
+  await streamText(run,
+    "Tools are opinions. These are the ones I've earned — if something stops helping me ship better work, it stops being on this list.");
+  if (run.cancelled) return;
+
+  CRAFT.forEach((g) => {
+    const rows = g.items.map((i) =>
+      '<div class="krow"><img class="ico" src="./assets/tech/' + i.icon + '.webp" alt="" loading="lazy" />' +
+      "<b>" + esc(i.name) + "</b><span>" + esc(i.note) + "</span></div>").join("");
+    panel(rows, "0" + g.n + " — " + g.title.toUpperCase() + " — " + g.kicker);
+  });
+}
+
+async function runAbout(run) {
+  const th = thinking("Assemble the bio, the timeline, and the things that matter to me.");
+  await sleep(720); if (run.cancelled) return th.hold();
+  th.hold(ABOUT.quote);
+  await sleep(240); if (run.cancelled) return;
+
+  await streamText(run, ABOUT.bio[0]);
+  if (run.cancelled) return;
+  await streamText(run, ABOUT.bio[1]);
+  if (run.cancelled) return;
+
+  const tl = ABOUT.timeline.map((t) =>
+    '<div class="krow"><b>' + esc(t.y) + "</b><span>" + esc(t.t) + "</span></div>").join("");
+  panel(tl, "HOW IT WENT — TIMELINE");
+
+  const bl = ABOUT.bullets.map((b) => '<div class="krow"><b>→</b><span>' + esc(b) + "</span></div>").join("");
+  panel(bl, "QUICK FACTS");
+}
+
+async function runContact(run) {
+  const th = thinking("Lay out the ways to reach me — email, GitHub, LinkedIn.");
+  await sleep(640); if (run.cancelled) return th.hold();
+  th.hold(CONTACT.line);
+  await sleep(220); if (run.cancelled) return;
+
+  await streamText(run, "Say hello — I read everything myself, no bot on the other end.");
+  if (run.cancelled) return;
+
+  panel(
+    '<div class="krow"><b>email</b><span><a href="mailto:' + CONTACT.email + '">' + CONTACT.email + "</a></span></div>" +
+    '<div class="krow"><b>github</b><span><a href="' + CONTACT.github + '" target="_blank" rel="noopener">@' + CONTACT.githubUser + "</a></span></div>" +
+    '<div class="krow"><b>linkedin</b><span><a href="' + CONTACT.linkedin + '" target="_blank" rel="noopener">' + CONTACT.linkedinUser + "</a></span></div>" +
+    '<div class="krow"><b>based in</b><span>India — working with people anywhere</span></div>',
+    "GET IN TOUCH");
+}
+
+async function runHelp(run) {
+  const th = thinking("Explain how this little terminal works, in the friendliest way I can.");
+  await sleep(600); if (run.cancelled) return th.hold();
+  th.hold("A short tour of the controls.");
+  await sleep(200); if (run.cancelled) return;
+
+  await streamText(run,
+    "This is my portfolio dressed as a coding terminal. You type a command, I think out loud for a moment, " +
+    "then the answer streams in — thoughts stay readable but fold away once the reply is complete.");
+  if (run.cancelled) return;
+
+  const keys = [
+    ["/", "opens the command list — or just click a chip"],
+    ["@", "mentions a file, like @index.html"],
+    ["Ctrl+P", "shows every command at once"],
+    ["Tab", "switches between Plan (talk only) and Act (do things)"],
+    ["Shift+Tab", "turns automatic answers on or off"],
+    ["Esc", "stops an answer halfway"],
+    ["↑ / ↓", "brings back something you typed earlier"],
+    ["?", "reopens the beginner guide"]
+  ].map((k) => '<div class="krow"><b>' + esc(k[0]) + "</b><span>" + esc(k[1]) + "</span></div>").join("");
+  panel(keys, "KEYBOARD");
+
+  const cmds = COMMANDS.map((c) =>
+    '<div class="krow"><b>' + esc(c.cmd) + "</b><span>" + esc(c.desc) + "</span></div>").join("");
+  panel(cmds, "COMMANDS — " + COMMANDS.length + " TOTAL");
+}
+
+async function runTheme() {
+  const order = ["harness", "abyss", "ember"];
+  const cur = order.indexOf(body.dataset.theme);
+  const next = order[(cur + 1) % order.length];
+  body.dataset.theme = next;
+  if (window.__mascotResize) window.__mascotResize();
+  panel('<div class="krow"><b>theme</b><span>' + esc(next) + " — run /theme again for the next one</span></div>", "COLOUR THEME");
+}
+
+async function runHistory() {
+  if (!S.history.length) {
+    panel('<div class="krow"><b>nothing yet</b><span>ask me something first</span></div>', "YOUR QUESTIONS");
+    return;
+  }
+  const rows = S.history.map((h, i) =>
+    '<div class="krow"><span class="num">' + String(i + 1).padStart(2, "0") + "</span><b>" + esc(h) + "</b></div>").join("");
+  panel(rows, "EVERYTHING YOU'VE ASKED — " + S.history.length);
+}
+
+async function runUndo() {
+  if (transcript.children.length <= 1) {
+    panel('<div class="krow"><b>nothing to undo</b><span>this is the start of the session</span></div>', "STEP BACK");
+    return;
+  }
+  let removed = 0;
+  while (transcript.children.length > 1 && removed < 8) { transcript.removeChild(transcript.lastChild); removed++; }
+  panel('<div class="krow"><b>went back</b><span>removed the last ' + removed + " blocks</span></div>", "STEP BACK");
+}
+
+/* free text → a short harness-style answer */
+async function runFree(run, text) {
+  const q = text.toLowerCase();
+  const th = thinking("Reading the request: " + JSON.stringify(text) + ". Figuring out the best way to answer it.");
+  await sleep(900); if (run.cancelled) return th.hold();
+
+  // simple, honest routing — no fake backend
+  if (/(hire|work with|available|freelance|job)/.test(q)) {
+    th.hold("They're asking about availability — point them at the contact block.");
+    await sleep(240); if (run.cancelled) return;
+    await streamText(run,
+      "Yes — I'm available for freelance and product work, remote worldwide. " +
+      "The fastest way to reach me is " + CONTACT.email + ", or type /contact and I'll lay everything out.");
+    return;
+  }
+  if (/(project|built|made|work|portfolio|ship)/.test(q)) {
+    th.hold("They want the work — pull up the five projects with screenshots.");
+    await sleep(240); if (run.cancelled) return;
+    await streamText(run, "Sure — here's everything I've shipped, newest first. Screenshots included.");
+    if (run.cancelled) return;
+    const t = toolCall("read", "data.js", ["5 projects found"]);
+    await sleep(520); t.expand();
+    for (let i = 0; i < PROJECTS.length; i++) {
+      if (run.cancelled) return;
+      projectCard(PROJECTS[i], i);
+      await sleep(400);
+    }
+    return;
+  }
+  if (/(stack|tool|use|tech|language|framework)/.test(q)) {
+    th.hold("Stack question — walk the three groups in plain words.");
+    await sleep(240); if (run.cancelled) return;
+    await streamText(run, "Happy to. Here's the stack, grouped by where it shows up in the work.");
+    if (run.cancelled) return;
+    CRAFT.forEach((g) => {
+      const rows = g.items.map((i) =>
+        '<div class="krow"><img class="ico" src="./assets/tech/' + i.icon + '.webp" alt="" loading="lazy" />' +
+        "<b>" + esc(i.name) + "</b><span>" + esc(i.note) + "</span></div>").join("");
+      panel(rows, "0" + g.n + " — " + g.title.toUpperCase());
+    });
+    return;
+  }
+  if (/(who|you|yourself|about|naman|bio)/.test(q)) {
+    th.hold("A short introduction, in their own voice.");
+    await sleep(240); if (run.cancelled) return;
+    await streamText(run, ABOUT.bio[0] + " Type /about for the full timeline.");
+    return;
+  }
+
+  th.hold("Give a warm nudge toward the commands.");
+  await sleep(240); if (run.cancelled) return;
+  await streamText(run,
+    "I'm a small terminal with a handful of commands rather than a full chatbot, so that one went over my head. " +
+    "Try /work for projects, /craft for the stack, /about for my story, or /contact to say hello.");
+}
+
+/* ══════════════════════════════════════════════════════
+   MENU (/ and @ and Ctrl+P)
+   ══════════════════════════════════════════════════════ */
+function renderMenu() {
+  const items = S.menuItems;
+  if (!items.length) { menu.hidden = true; return; }
+  const MAX = 7;
+  const shown = items.slice(0, MAX);
+  const rest = items.length - shown.length;
+
+  menu.innerHTML = shown.map((it, i) =>
+    '<div class="menu__i' + (i === S.menuIdx ? " on" : "") + '" data-i="' + i + '">' +
+    '<span class="mk">›</span><span class="cmd">' + esc(it.a) + "</span>" +
+    '<span class="desc">' + esc(it.b) + "</span></div>"
+  ).join("") + (rest > 0 ? '<div class="menu__more"><span>▼</span> ' + rest + " more</div>" : "");
+
+  menu.hidden = false;
+  [...menu.querySelectorAll(".menu__i")].forEach((el) => {
+    el.onpointerenter = () => { S.menuIdx = +el.dataset.i; renderMenu(); };
+    el.onclick = () => pickMenu(+el.dataset.i);
+  });
+}
+
+function openMenu(kind) {
+  S.menuKind = kind;
+  if (kind === "cmd") {
+    const q = input.value.trim().toLowerCase();
+    S.menuItems = COMMANDS.filter((c) => c.cmd.startsWith(q)).map((c) => ({ a: c.cmd, b: c.desc }));
+  } else {
+    const q = input.value.slice(1).toLowerCase();
+    S.menuItems = FILES.filter((f) => f.toLowerCase().includes(q)).map((f) => ({ a: "@" + f, b: "file" }));
+  }
+  S.menuIdx = S.menuItems.length ? 0 : -1;
+  renderMenu();
+}
+function closeMenu() { menu.hidden = true; S.menuIdx = -1; S.menuKind = null; }
+
+function pickMenu(i) {
+  const it = S.menuItems[i];
+  if (!it) return;
+  if (S.menuKind === "cmd") { closeMenu(); input.value = ""; submit(it.a); }
+  else { input.value = it.a + " "; closeMenu(); input.focus(); }
+}
+
+/* ══════════════════════════════════════════════════════
+   MODE / STATUS
+   ══════════════════════════════════════════════════════ */
+function setMode(m) {
+  S.mode = m;
+  body.dataset.mode = m;
+  toggle.querySelectorAll(".opt").forEach((o) => {
+    const on = o.dataset.mode === m;
+    o.classList.toggle("is-on", on);
+    o.textContent = (on ? "● " : "○ ") + (o.dataset.mode === "plan" ? "Plan" : "Act");
+  });
+  input.placeholder = m === "plan" ? "Plan something..." : "What can I do for you?";
+}
+function cycleMode() { setMode(S.mode === "act" ? "plan" : "act"); }
+
+function setAuto(v) {
+  S.autoAnswer = v;
+  autoBtn.classList.toggle("off", !v);
+  autoBtn.innerHTML = v
+    ? '⏵⏵ Answers stream automatically <span class="dim">(Shift+Tab)</span>'
+    : '○ Paused — press Shift+Tab to resume <span class="dim">(Shift+Tab)</span>';
+}
+
+/* ══════════════════════════════════════════════════════
+   SESSION / SUBMIT
+   ══════════════════════════════════════════════════════ */
+function newSession() {
+  if (S.run) S.run.cancelled = true;
+  transcript.innerHTML = "";
+  body.dataset.state = "idle";
+  S.history = []; S.histIdx = -1;
+  input.value = "";
+  input.placeholder = S.mode === "plan" ? "Plan something..." : "What can I do for you?";
+  closeMenu();
+  requestAnimationFrame(() => { if (window.__mascotResize) window.__mascotResize(); });
+  input.focus();
+}
+
+async function submit(raw) {
+  const text = raw.trim();
+  if (!text) return;
+
+  if (text === "/clear") { newSession(); return; }
+
+  const cmd = COMMANDS.find((c) => c.cmd.toLowerCase() === text.toLowerCase());
+
+  if (text.startsWith("/") && !cmd) {
+    S.history.push(text); S.histIdx = S.history.length;
+    toActive(); echo(text);
+    const run = newRun();
+    await sleep(320);
+    if (!run.cancelled) errLine("Error: no such command — try /help to see the list");
+    input.value = ""; closeMenu();
+    return;
+  }
+
+  S.history.push(text); S.histIdx = S.history.length;
+  toActive(); echo(text);
+  input.value = ""; closeMenu();
+
+  const run = newRun();
+  try {
+    if (cmd) await cmd.run(run);
+    else await runFree(run, text);
+  } catch (e) {
+    errLine("Error: " + (e && e.message ? e.message : e));
+  }
+  // reply complete → fold the thoughts away (user can still reopen)
+  S.thinking.forEach((h) => { h.bind(); h.collapse(); });
+  pin();
+}
+
+/* ══════════════════════════════════════════════════════
+   BEGINNER GUIDE + live typing demo
+   ══════════════════════════════════════════════════════ */
+const DEMO_STEPS = [
+  { kind: "type", text: "/work" },
+  { kind: "enter" },
+  { kind: "think", text: "Thinking…  lining up the good parts…" , ms: 1500 },
+  { kind: "out", text: "✳ Here is the work — five things I actually built.", ms: 1400 },
+  { kind: "card", text: "▸ 01  Smart Mailto   screenshot + live link", ms: 2000 },
+  { kind: "clear" }
+];
+
+function runDemo() {
+  const screen = $("demoScreen");
+  if (!screen) return;
+  let stopped = false;
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  async function loop() {
+    while (!stopped) {
+      for (const step of DEMO_STEPS) {
+        if (stopped) return;
+        if (step.kind === "type") {
+          screen.innerHTML = '<div class="demo__in"><span class="c">&gt;</span> <span class="tv"></span><span class="caret"></span></div>';
+          const tv = screen.querySelector(".tv");
+          for (let i = 1; i <= step.text.length; i++) {
+            if (stopped) return;
+            tv.textContent = step.text.slice(0, i);
+            await wait(95);
+          }
+          await wait(420);
+        } else if (step.kind === "enter") {
+          const cur = screen.innerHTML;
+          screen.innerHTML = cur.replace('<span class="caret"></span>', "");
+          await wait(320);
+        } else if (step.kind === "think") {
+          screen.innerHTML += '\n<div class="demo__think">⠹ ' + esc(step.text) + "</div>";
+          const el = screen.querySelector(".demo__think");
+          const frames = ["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"];
+          let f = 0;
+          const iv = setInterval(() => { if (stopped) return clearInterval(iv); f = (f + 1) % frames.length; el.textContent = frames[f] + " " + step.text; }, 110);
+          await wait(step.ms);
+          clearInterval(iv);
+        } else if (step.kind === "out") {
+          screen.innerHTML += '\n<div class="demo__out"><span class="mk">✳</span> <span class="ov"></span></div>';
+          const ov = screen.querySelector(".ov");
+          const txt = step.text.replace("✳ ", "");
+          for (let i = 1; i <= txt.length; i += 2) {
+            if (stopped) return;
+            ov.textContent = txt.slice(0, i);
+            await wait(22);
+          }
+          await wait(step.ms);
+        } else if (step.kind === "card") {
+          screen.innerHTML += '\n<div class="demo__out">' + esc(step.text) + "</div>";
+          await wait(step.ms);
+        } else if (step.kind === "clear") {
+          await wait(700);
+          if (!stopped) screen.innerHTML = "";
+        }
+      }
+    }
+  }
+  loop();
+  return () => { stopped = true; };
+}
+
+let stopDemo = null;
+function openGuide() {
+  guide.hidden = false;
+  $("guideRemember").focus?.();
+  if (stopDemo) stopDemo();
+  stopDemo = runDemo();
+}
+function closeGuide(remember) {
+  guide.hidden = true;
+  if (stopDemo) { stopDemo(); stopDemo = null; }
+  try { if (remember) localStorage.setItem("pt-guide-seen", "1"); } catch (e) {}
+  input.focus();
+}
+
+/* ══════════════════════════════════════════════════════
+   EVENTS
+   ══════════════════════════════════════════════════════ */
+input.addEventListener("input", () => {
+  const v = input.value;
+  if (v.startsWith("/")) openMenu("cmd");
+  else if (v.startsWith("@")) openMenu("file");
+  else closeMenu();
+});
+
+input.addEventListener("keydown", (e) => {
+  if (!menu.hidden && S.menuItems.length) {
+    if (e.key === "ArrowDown") { e.preventDefault(); S.menuIdx = (S.menuIdx + 1) % S.menuItems.length; renderMenu(); return; }
+    if (e.key === "ArrowUp") { e.preventDefault(); S.menuIdx = (S.menuIdx - 1 + S.menuItems.length) % S.menuItems.length; renderMenu(); return; }
+    if (e.key === "Tab") { e.preventDefault(); S.menuIdx = (S.menuIdx + 1) % S.menuItems.length; renderMenu(); return; }
+    if (e.key === "Enter") { e.preventDefault(); pickMenu(S.menuIdx); return; }
+    if (e.key === "Escape") { e.preventDefault(); closeMenu(); return; }
+  }
+
+  if (e.key === "Enter") { e.preventDefault(); submit(input.value); return; }
+
+  if (e.key === "Escape") {
+    e.preventDefault();
+    if (S.run && !S.run.cancelled) {
+      S.run.cancelled = true;
+      const live = transcript.querySelector(".think__live");
+      if (live) {
+        const box = live.closest(".think");
+        if (box) { box.dataset.cancelled = "1"; box.innerHTML = '<span class="think__inline" style="color:var(--red)">✳ Cancelled</span>'; }
+      }
+    } else { input.value = ""; closeMenu(); }
+    return;
+  }
+
+  if (e.key === "Tab" && !e.shiftKey) { e.preventDefault(); cycleMode(); return; }
+
+  if (e.key === "ArrowUp" && !input.value) {
+    e.preventDefault();
+    if (!S.history.length) return;
+    S.histIdx = Math.max(0, S.histIdx - 1);
+    input.value = S.history[S.histIdx] || "";
+    return;
+  }
+  if (e.key === "ArrowDown" && S.histIdx >= 0) {
+    e.preventDefault();
+    S.histIdx = Math.min(S.history.length, S.histIdx + 1);
+    input.value = S.history[S.histIdx] || "";
+    return;
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  const k = e.key.toLowerCase();
+  if (!guide.hidden) {
+    if (e.key === "Escape") { e.preventDefault(); closeGuide(true); }
+    return;
+  }
+  if ((e.ctrlKey || e.metaKey) && k === "p") { e.preventDefault(); input.focus(); input.value = "/"; openMenu("cmd"); return; }
+  if ((e.ctrlKey || e.metaKey) && k === "l") { e.preventDefault(); newSession(); return; }
+  if (e.key === "?" && document.activeElement !== input) { e.preventDefault(); openGuide(); return; }
+  if (e.key === "Shift" && e.shiftKey) return;
+  if (e.key === "Tab" && e.shiftKey) { e.preventDefault(); setAuto(!S.autoAnswer); return; }
+  if (e.key === "/" && document.activeElement !== input && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    e.preventDefault(); input.focus(); input.value = "/"; openMenu("cmd");
+  }
+});
+
+toggle.addEventListener("click", (e) => { const o = e.target.closest(".opt"); if (o) setMode(o.dataset.mode); });
+autoBtn.addEventListener("click", () => setAuto(!S.autoAnswer));
+autoBtn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setAuto(!S.autoAnswer); } });
+$("chips").addEventListener("click", (e) => { const b = e.target.closest(".chip"); if (b) submit(b.dataset.cmd); });
+$("helpBtn").addEventListener("click", openGuide);
+$("guideX").addEventListener("click", () => closeGuide($("guideRemember").checked));
+$("guideClose").addEventListener("click", () => closeGuide($("guideRemember").checked));
+$("guideGo").addEventListener("click", () => { closeGuide($("guideRemember").checked); setTimeout(() => submit("/work"), 180); });
+document.addEventListener("click", (e) => { if (!e.target.closest(".prompt")) closeMenu(); });
+
+/* boot */
+setMode("act");
+setAuto(true);
+let seen = false;
+try { seen = localStorage.getItem("pt-guide-seen") === "1"; } catch (e) {}
+if (!seen) setTimeout(openGuide, 550);
+setTimeout(() => input.focus(), 80);
+
+})();
