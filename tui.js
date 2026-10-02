@@ -647,13 +647,49 @@ async function runHelp(run) {
   panel(cmds, "COMMANDS — " + COMMANDS.length + " TOTAL");
 }
 
-async function runTheme() {
-  const order = ["harness", "abyss", "ember"];
-  const cur = order.indexOf(body.dataset.theme);
-  const next = order[(cur + 1) % order.length];
-  body.dataset.theme = next;
+/* the full genuine palette set — must match the data-theme blocks in styles.css */
+const THEMES = [
+  ["harness",        "the default — near black + electric blue"],
+  ["abyss",          "deep ocean blue-black"],
+  ["ember",          "warm dark with orange sparks"],
+  ["dracula",        "the classic purple-pink night"],
+  ["nord",           "arctic, muted blue-grey"],
+  ["gruvbox",        "retro groove — brown, orange, olive"],
+  ["monokai",        "the original editor orange-green"],
+  ["solarized-dark", "Ethan Schoonover's blue-green"],
+  ["solarized-light","the same, on paper"],
+  ["one-dark",       "Atom's familiar grey-blue"],
+  ["tokyo-night",    "neon dusk over the city"],
+  ["catppuccin",     "soft pastel mocha"],
+  ["rose-pine",      "dusk mauve with seafoam"],
+  ["everforest",     "mossy green outdoors"],
+  ["kanagawa",       "ink wash, sumi-e beige"],
+  ["github-dark",    "the one you already stare at"]
+];
+function applyTheme(name) {
+  body.dataset.theme = name;
+  try { localStorage.setItem("pt-theme", name); } catch (e) {}
   if (window.__mascotResize) window.__mascotResize();
-  panel('<div class="krow"><b>theme</b><span>' + esc(next) + " — run /theme again for the next one</span></div>", "COLOUR THEME");
+}
+async function runTheme(run, arg) {
+  /* /theme <name> jumps straight there */
+  const wanted = (arg || "").trim().toLowerCase();
+  if (wanted && THEMES.some((t) => t[0] === wanted)) {
+    applyTheme(wanted);
+    panel('<div class="krow"><b>' + esc(wanted) + "</b><span>applied</span></div>", "COLOUR THEME");
+    return;
+  }
+  const th = thinking("They want a new look — lay out all sixteen palettes as clickable rows.");
+  await sleep(520); if (run && run.cancelled) return th.hold();
+  th.hold("Click any row — it applies instantly and sticks for next time.");
+  await sleep(200); if (run && run.cancelled) return;
+
+  const cur = body.dataset.theme || "harness";
+  const rows = THEMES.map(([id, note]) =>
+    '<div class="krow thm' + (id === cur ? " is-cur" : "") + '" data-theme="' + id + '" role="button" tabindex="0">' +
+    '<span class="sw"><i></i><i></i><i></i></span>' +
+    "<b>" + esc(id) + "</b><span>" + esc(note) + (id === cur ? " ✓" : "") + "</span></div>").join("");
+  panel(rows, "COLOUR THEMES — CLICK TO SWITCH (" + THEMES.length + ")");
 }
 
 async function runHistory() {
@@ -836,7 +872,10 @@ async function submit(raw) {
 
   if (text === "/clear") { newSession(); return; }
 
-  const cmd = COMMANDS.find((c) => c.cmd.toLowerCase() === text.toLowerCase());
+  /* "/theme dracula" → cmd + trailing arg */
+  const parts = text.split(/\s+/);
+  const cmd = COMMANDS.find((c) => c.cmd.toLowerCase() === parts[0]);
+  const cmdArg = cmd && parts.length > 1 ? parts.slice(1).join(" ") : "";
 
   if (text.startsWith("/") && !cmd) {
     S.history.push(text); S.histIdx = S.history.length;
@@ -854,7 +893,7 @@ async function submit(raw) {
 
   const run = newRun();
   try {
-    if (cmd) await cmd.run(run);
+    if (cmd) await cmd.run(run, cmdArg);
     else await runFree(run, text);
   } catch (e) {
     errLine("Error: " + (e && e.message ? e.message : e));
@@ -1019,6 +1058,18 @@ document.addEventListener("keydown", (e) => {
 toggle.addEventListener("click", (e) => { const o = e.target.closest(".opt"); if (o) setMode(o.dataset.mode); });
 autoBtn.addEventListener("click", () => setAuto(!S.autoAnswer));
 autoBtn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setAuto(!S.autoAnswer); } });
+/* clicking a /theme row switches instantly */
+transcript.addEventListener("click", (e) => {
+  const row = e.target.closest(".krow.thm");
+  if (!row) return;
+  applyTheme(row.dataset.theme);
+  transcript.querySelectorAll(".krow.thm").forEach((r) => {
+    r.classList.toggle("is-cur", r.dataset.theme === body.dataset.theme);
+    const note = r.lastElementChild;
+    if (note && note.textContent.endsWith(" ✓")) note.textContent = note.textContent.slice(0, -2);
+    if (note && r.dataset.theme === body.dataset.theme) note.textContent += " ✓";
+  });
+});
 $("chips").addEventListener("click", (e) => { const b = e.target.closest(".chip"); if (b) submit(b.dataset.cmd); });
 $("backBtn").addEventListener("click", goBack);
 $("helpBtn").addEventListener("click", openGuide);
@@ -1030,6 +1081,10 @@ document.addEventListener("click", (e) => { if (!e.target.closest(".prompt")) cl
 /* boot */
 setMode("act");
 setAuto(true);
+try {                                                  // remember the last theme
+  const saved = localStorage.getItem("pt-theme");
+  if (saved && THEMES.some((t) => t[0] === saved)) body.dataset.theme = saved;
+} catch (e) {}
 let seen = false;
 try { seen = localStorage.getItem("pt-guide-seen") === "1"; } catch (e) {}
 if (!seen) setTimeout(openGuide, 550);

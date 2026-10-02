@@ -241,7 +241,7 @@
     var occ = occBuf;
     occ.fill(0);
 
-    var eyeRadX = EYE_R * sE;
+    var eyeRadX = EYE_R * sE, eyeRadY = EYE_R * sE * bk;
     var blushRad = BLUSH_R * sE;
     var hoverR = 2.1 * sE;
 
@@ -281,12 +281,24 @@
         var step = Math.max(0, Math.min(STEPS - 1,
           Math.round((bri - 0.74) / 0.26 * (STEPS - 1))));
 
-        /* blush sits under the eyes (ASCII cells) */
+        /* face: blush, then dark ASCII eyes (with a small glint) */
         var overlay = false;
         for (i = 0; i < blushPts.length; i++) {
           var bdx = sx - blushPts[i][0], bdy = sy - blushPts[i][1];
           if ((bdx * bdx) / (blushRad * blushRad) + (bdy * bdy) / (blushRad * blushRad) <= 1) {
             base = "blush"; ch = "@"; step = 2; overlay = true; break;
+          }
+        }
+        if (!overlay) {
+          for (i = 0; i < eyePts.length; i++) {
+            var edx = sx - eyePts[i][0], edy = sy - eyePts[i][1];
+            if ((edx * edx) / (eyeRadX * eyeRadX) +
+                (edy * edy) / (eyeRadY * eyeRadY + 0.0001) <= 1) {
+              base = "dark"; ch = "@"; step = 0; overlay = true;
+              /* sparkle: upper-left quadrant of the eye gets a glint */
+              if (edx < -eyeRadX * 0.15 && edy < -eyeRadY * 0.15) { base = "glint"; ch = "."; }
+              break;
+            }
           }
         }
         occ[r * cols + c] = 1;
@@ -366,38 +378,6 @@
           (list[j] + 0.5) * cellW, list[j + 1] * cellH + cellH * 0.5);
       }
     }
-
-    /* ── vector eyes: old rubber-hose cartoon style — a TALL WHITE OVAL
-          with a small BLACK OVAL pupil resting LOW inside it (Mickey /
-          Cuphead era), not a circle inside a circle. The pupil still
-          glances toward the cursor but stays pinned to the lower half. ── */
-    var pdx, pdy;
-    if (ptr.on && rect) {
-      pdx = Math.max(-1, Math.min(1, (ptr.x - cxE) / (W * 0.35)));
-      pdy = Math.max(-1, Math.min(1, (ptr.y - cyE) / (H * 0.45)));
-    } else {
-      pdx = Math.sin(t * 0.50) * 0.32;              // idle wander
-      pdy = Math.cos(t * 0.41) * 0.22;
-    }
-    for (i = 0; i < eyePts.length; i++) {
-      var ex = eyePts[i][0], ey = eyePts[i][1];
-      var wrx = eyeRadX;                             // oval: taller than wide
-      var wry = eyeRadX * 1.30 * bk;                 // blink squashes it flat
-      if (wry < 1) continue;
-
-      /* white part — vertical oval */
-      ctx.fillStyle = "#ffffff";
-      ctx.beginPath(); ctx.ellipse(ex, ey, wrx, wry, 0, 0, Math.PI * 2); ctx.fill();
-
-      /* black part — small oval sitting low in the white */
-      var prx = wrx * 0.60;
-      var pry = Math.max(wry * 0.44, pupMin(bk));
-      var px = ex + pdx * (wrx - prx) * 0.85;
-      var py = ey + wry * 0.38 + pdy * wry * 0.20;   // low + a gentle glance
-      ctx.fillStyle = "#16100e";
-      ctx.beginPath(); ctx.ellipse(px, py, prx, pry, 0, 0, Math.PI * 2); ctx.fill();
-    }
-    function pupMin(b) { return b < 1 ? 1.5 : 0; }   // pupil never fully vanishes
   }
 
   function start() {

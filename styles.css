@@ -2,6 +2,11 @@
    Terminal portfolio — single screen, everything inside the TUI
    ══════════════════════════════════════════════════════════════ */
 
+/* ── themes: 16 genuine palettes (dracula, nord, gruvbox, monokai,
+       solarized, one dark, tokyo night, catppuccin, rosé pine, everforest,
+       kanagawa, github + three originals). Every one defines the full
+       variable set — switching is instant, no reload. ── */
+
 :root, body[data-theme="harness"]{
   --bg:#0a0a0b; --bg-row:#161619; --bg-panel:#1b1b1f; --bg-code:#0f0f13;
   --line:#232327; --line2:#2e2e34;
@@ -13,11 +18,91 @@ body[data-theme="abyss"]{
   --bg:#05070d; --bg-row:#0d1220; --bg-panel:#101728; --bg-code:#070b14;
   --line:#182036; --line2:#23304d; --fg:#dfe8ff; --dim:#7f8db0; --dimmer:#4e5a78;
   --blue:#38bdf8; --blue-soft:#7dd3fc; --amber:#fbbf24; --violet:#c084fc;
+  --green:#4ade80; --red:#f87171;
 }
 body[data-theme="ember"]{
   --bg:#0c0806; --bg-row:#1a1310; --bg-panel:#1f1713; --bg-code:#120d0a;
   --line:#2a1f19; --line2:#3a2b23; --fg:#f0e6e0; --dim:#9c8a80; --dimmer:#6a5a52;
   --blue:#fb923c; --blue-soft:#fdba74; --amber:#facc15; --violet:#f0abfc;
+  --green:#4ade80; --red:#f87171;
+}
+body[data-theme="dracula"]{
+  --bg:#282a36; --bg-row:#21222c; --bg-panel:#2b2d40; --bg-code:#1e1f29;
+  --line:#33344a; --line2:#44475a; --fg:#f8f8f2; --dim:#6272a4; --dimmer:#4c5274;
+  --blue:#bd93f9; --blue-soft:#d3c2ff; --amber:#ffb86c; --violet:#ff79c6;
+  --green:#50fa7b; --red:#ff5555;
+}
+body[data-theme="nord"]{
+  --bg:#2e3440; --bg-row:#3b4252; --bg-panel:#434c5e; --bg-code:#272e38;
+  --line:#434c5e; --line2:#4c566a; --fg:#eceff4; --dim:#7b88a1; --dimmer:#5b677f;
+  --blue:#81a1c1; --blue-soft:#88c0d0; --amber:#ebcb8b; --violet:#b48ead;
+  --green:#a3be8c; --red:#bf616a;
+}
+body[data-theme="gruvbox"]{
+  --bg:#282828; --bg-row:#32302f; --bg-panel:#3c3836; --bg-code:#1d2021;
+  --line:#504945; --line2:#665c54; --fg:#ebdbb2; --dim:#928374; --dimmer:#7c6f64;
+  --blue:#83a598; --blue-soft:#a8c8d8; --amber:#fabd2f; --violet:#d3869b;
+  --green:#b8bb26; --red:#fb4934;
+}
+body[data-theme="monokai"]{
+  --bg:#272822; --bg-row:#3e3d32; --bg-panel:#49483e; --bg-code:#1e1f1c;
+  --line:#49483e; --line2:#605c52; --fg:#f8f8f2; --dim:#75715e; --dimmer:#5f5c52;
+  --blue:#66d9ef; --blue-soft:#9be9ef; --amber:#e6db74; --violet:#ae81ff;
+  --green:#a6e22e; --red:#f92672;
+}
+body[data-theme="solarized-dark"]{
+  --bg:#002b36; --bg-row:#073642; --bg-panel:#0a3d4c; --bg-code:#00222b;
+  --line:#0b4152; --line2:#1c5a6e; --fg:#93a1a1; --dim:#657b83; --dimmer:#586e75;
+  --blue:#268bd2; --blue-soft:#4aa8d8; --amber:#b58900; --violet:#d33683;
+  --green:#859900; --red:#dc322f;
+}
+body[data-theme="solarized-light"]{
+  --bg:#fdf6e3; --bg-row:#eee8d5; --bg-panel:#e7e0cc; --bg-code:#f6efdb;
+  --line:#e4dcc8; --line2:#d0c6af; --fg:#586e75; --dim:#839496; --dimmer:#93a1a1;
+  --blue:#268bd2; --blue-soft:#1a7fbf; --amber:#b58900; --violet:#d33683;
+  --green:#6c8500; --red:#cb3d3a;
+}
+body[data-theme="one-dark"]{
+  --bg:#282c34; --bg-row:#21252b; --bg-panel:#2c313a; --bg-code:#1e222a;
+  --line:#3a3f4b; --line2:#4b5263; --fg:#abb2bf; --dim:#7f848e; --dimmer:#5c6370;
+  --blue:#61afef; --blue-soft:#8ecdf7; --amber:#e5c07b; --violet:#c678dd;
+  --green:#98c379; --red:#e06c75;
+}
+body[data-theme="tokyo-night"]{
+  --bg:#1a1b26; --bg-row:#16161e; --bg-panel:#24283b; --bg-code:#13141c;
+  --line:#292e42; --line2:#414868; --fg:#c0caf5; --dim:#787c99; --dimmer:#565f89;
+  --blue:#7aa2f7; --blue-soft:#7dcfff; --amber:#e0af68; --violet:#bb9af7;
+  --green:#9ece6a; --red:#f7768e;
+}
+body[data-theme="catppuccin"]{
+  --bg:#1e1e2e; --bg-row:#181825; --bg-panel:#313244; --bg-code:#11111b;
+  --line:#313244; --line2:#45475a; --fg:#cdd6f4; --dim:#a6adc8; --dimmer:#6c7086;
+  --blue:#89b4fa; --blue-soft:#a8c7fa; --amber:#f9e2af; --violet:#cba6f7;
+  --green:#a6e3a1; --red:#f38ba8;
+}
+body[data-theme="rose-pine"]{
+  --bg:#191724; --bg-row:#1f1d2e; --bg-panel:#26233a; --bg-code:#14121d;
+  --line:#2a273f; --line2:#403d52; --fg:#e0def4; --dim:#908caa; --dimmer:#6e6a86;
+  --blue:#9ccfd8; --blue-soft:#b9e3ea; --amber:#f6c177; --violet:#c4a7e7;
+  --green:#5fbd98; --red:#eb6f92;
+}
+body[data-theme="everforest"]{
+  --bg:#2d353b; --bg-row:#343f44; --bg-panel:#3c464e; --bg-code:#262e32;
+  --line:#425047; --line2:#56645b; --fg:#d3c6aa; --dim:#859289; --dimmer:#627069;
+  --blue:#7fbbb3; --blue-soft:#9fd0c9; --amber:#dbbc7f; --violet:#d699b6;
+  --green:#a7c080; --red:#e67e80;
+}
+body[data-theme="kanagawa"]{
+  --bg:#1f1f28; --bg-row:#1a1a22; --bg-panel:#2a2a37; --bg-code:#16161d;
+  --line:#36363d; --line2:#54546d; --fg:#dcd7ba; --dim:#9e9b8f; --dimmer:#727169;
+  --blue:#7e9cd8; --blue-soft:#a3b8e0; --amber:#dca561; --violet:#957fb8;
+  --green:#7aa89f; --red:#c34043;
+}
+body[data-theme="github-dark"]{
+  --bg:#0d1117; --bg-row:#161b22; --bg-panel:#21262d; --bg-code:#090c10;
+  --line:#30363d; --line2:#484f58; --fg:#e6edf3; --dim:#8b949e; --dimmer:#6e7681;
+  --blue:#58a6ff; --blue-soft:#79c0ff; --amber:#d29922; --violet:#bc8cff;
+  --green:#3fb950; --red:#f85149;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -129,6 +214,22 @@ body[data-mode="plan"] .row--echo .chev{color:var(--amber)}
 .krow b{color:var(--fg);font-weight:700;min-width:172px}
 .krow span{color:var(--dim);font-size:12.5px}
 .krow .num{color:var(--dimmer);min-width:24px}
+/* /theme picker rows */
+.krow.thm{cursor:pointer;transition:.14s;border-radius:6px;padding:3px 8px;margin-left:-8px}
+.krow.thm:hover{background:var(--bg-row)}
+.krow.thm.is-cur{background:var(--bg-row);box-shadow:inset 2px 0 0 var(--blue)}
+.krow.thm .sw{display:inline-flex;gap:3px;min-width:44px;flex:none;align-self:center}
+.krow.thm .sw i{
+  width:12px;height:12px;border-radius:3px;display:block;
+  border:1px solid var(--line2);
+}
+.krow.thm .sw i:nth-child(1){background:var(--bg)}
+.krow.thm .sw i:nth-child(2){background:var(--fg)}
+.krow.thm .sw i:nth-child(3){background:var(--blue)}
+.krow.thm.is-cur b{color:var(--blue-soft)}
+@media (prefers-reduced-motion:no-preference){
+  .krow.thm:hover{transform:translateX(2px)}
+}
 
 /* project card — header, then screenshot + copy side by side */
 .proj{
