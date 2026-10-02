@@ -58,7 +58,7 @@ body[data-theme="solarized-dark"]{
 }
 body[data-theme="solarized-light"]{
   --bg:#fdf6e3; --bg-row:#eee8d5; --bg-panel:#e7e0cc; --bg-code:#f6efdb;
-  --line:#e4dcc8; --line2:#d0c6af; --fg:#586e75; --dim:#839496; --dimmer:#93a1a1;
+  --line:#e4dcc8; --line2:#d0c6af; --fg:#586e75; --dim:#657b83; --dimmer:#839496;
   --blue:#268bd2; --blue-soft:#1a7fbf; --amber:#b58900; --violet:#d33683;
   --green:#6c8500; --red:#cb3d3a;
 }
