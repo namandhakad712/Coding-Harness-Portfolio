@@ -1,6 +1,6 @@
 /* ══════════════════════════════════════════════════════════════
    ascii3d.js — the cursor-following ASCII mascot (v2, analytic)
-   A round peach blob with a sprout, big cartoon eyes and blush.
+   A round peach blob with a sprout, dark ASCII eyes and blush.
    Instead of rasterising thousands of random points (which looked
    like noise), the body is solved ANALYTICALLY per grid cell:
      · silhouette = ellipse (wider at the bottom, flat base)
@@ -26,11 +26,13 @@
     mint:  [196, 244, 222],
     leaf:  [122, 226, 148],
     stem:  [104, 204, 130],
-    blush: [255, 96, 122]
+    blush: [255, 96, 122],
+    dark:  [24, 14, 12],
+    glint: [255, 255, 255]
   };
-  var BASES = ["peach", "mint", "leaf", "stem", "blush"];
+  var BASES = ["peach", "mint", "leaf", "stem", "blush", "dark", "glint"];
   var STEPS = 6;
-  var FLAT = {};                            // (reserved) bases that ignore shading
+  var FLAT = { dark: 1, glint: 1 };         // eyes ignore shading
 
   /* precomputed colour strings: base × brightness step */
   var COLORS = [];
@@ -52,12 +54,9 @@
       BUCKET[BASES[bi] + si] = bi * STEPS + si;
 
   /* ── creature definition (object space, Y up) ───────── */
-  /* big old-cartoon eyes: smooth white disc + dark pupil that tracks the
-     gaze. Drawn as vector circles after the ASCII flush, so they stay
-     crisp. No mouth — the eyes and blush carry the whole face. */
-  var EYES = [[-0.30, 0.26, 0.918], [0.30, 0.26, 0.918]];
-  var EYE_R = 0.30;
-  var PUP_R = 0.155;
+  /* eyes are plain dark ASCII areas with a small glint — no mouth */
+  var EYES = [[-0.31, 0.27, 0.907], [0.31, 0.27, 0.907]];
+  var EYE_R = 0.21;
   var BLUSH = [[-0.62, -0.14, 0.772], [0.62, -0.14, 0.772]];
   var BLUSH_R = 0.14;
 
@@ -242,7 +241,7 @@
     var occ = occBuf;
     occ.fill(0);
 
-    var eyeRadX = EYE_R * sE, eyeRadY = EYE_R * sE * bk;
+    var eyeRadX = EYE_R * sE;
     var blushRad = BLUSH_R * sE;
     var hoverR = 2.1 * sE;
 
@@ -368,9 +367,10 @@
       }
     }
 
-    /* ── vector eyes: big white discs + dark pupils that follow the cursor.
-          Drawn as smooth circles (not ASCII cells) so they read as clean,
-          old-cartoon eyes against the textured body. ── */
+    /* ── vector eyes: old rubber-hose cartoon style — a TALL WHITE OVAL
+          with a small BLACK OVAL pupil resting LOW inside it (Mickey /
+          Cuphead era), not a circle inside a circle. The pupil still
+          glances toward the cursor but stays pinned to the lower half. ── */
     var pdx, pdy;
     if (ptr.on && rect) {
       pdx = Math.max(-1, Math.min(1, (ptr.x - cxE) / (W * 0.35)));
@@ -379,27 +379,23 @@
       pdx = Math.sin(t * 0.50) * 0.32;              // idle wander
       pdy = Math.cos(t * 0.41) * 0.22;
     }
-    var gazeR = (EYE_R - PUP_R) * sE * 0.52;
     for (i = 0; i < eyePts.length; i++) {
       var ex = eyePts[i][0], ey = eyePts[i][1];
-      var wry = eyeRadX * bk;                        // blink squashes the disc
+      var wrx = eyeRadX;                             // oval: taller than wide
+      var wry = eyeRadX * 1.30 * bk;                 // blink squashes it flat
       if (wry < 1) continue;
 
+      /* white part — vertical oval */
       ctx.fillStyle = "#ffffff";
-      ctx.beginPath(); ctx.ellipse(ex, ey, eyeRadX, wry, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(ex, ey, wrx, wry, 0, 0, Math.PI * 2); ctx.fill();
 
-      var prx = Math.min(PUP_R * sE, eyeRadX * 0.62);
-      var pry = Math.max(Math.min(PUP_R * sE, wry * 0.62), pupMin(bk));
-      var px = ex + pdx * gazeR, py = ey + pdy * gazeR * 0.75;
+      /* black part — small oval sitting low in the white */
+      var prx = wrx * 0.60;
+      var pry = Math.max(wry * 0.44, pupMin(bk));
+      var px = ex + pdx * (wrx - prx) * 0.85;
+      var py = ey + wry * 0.38 + pdy * wry * 0.20;   // low + a gentle glance
       ctx.fillStyle = "#16100e";
       ctx.beginPath(); ctx.ellipse(px, py, prx, pry, 0, 0, Math.PI * 2); ctx.fill();
-
-      if (bk > 0.6) {                               // classic single glint
-        ctx.fillStyle = "rgba(255,255,255,.95)";
-        ctx.beginPath();
-        ctx.arc(px - prx * 0.30, py - pry * 0.38, prx * 0.30, 0, Math.PI * 2);
-        ctx.fill();
-      }
     }
     function pupMin(b) { return b < 1 ? 1.5 : 0; }   // pupil never fully vanishes
   }
