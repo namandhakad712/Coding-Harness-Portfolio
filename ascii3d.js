@@ -295,8 +295,13 @@
             if ((edx * edx) / (eyeRadX * eyeRadX) +
                 (edy * edy) / (eyeRadY * eyeRadY + 0.0001) <= 1) {
               base = "dark"; ch = "@"; step = 0; overlay = true;
-              /* sparkle: upper-left quadrant of the eye gets a glint */
-              if (edx < -eyeRadX * 0.15 && edy < -eyeRadY * 0.15) { base = "glint"; ch = "."; }
+              /* highlight: one small SOLID white block resting in the
+                 lower part of the black area (bottom-left), instead of
+                 a scatter of dots that read like dashes */
+              if (edy > eyeRadY * 0.10 && edy < eyeRadY * 0.62 &&
+                  edx > -eyeRadX * 0.62 && edx < -eyeRadX * 0.02) {
+                base = "glint"; ch = "█"; step = 0;
+              }
               break;
             }
           }
