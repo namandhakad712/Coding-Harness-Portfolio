@@ -399,4 +399,6 @@
 
   // the TUI toggles .idle display — re-measure when it comes back
   window.__mascotResize = resize;
+  // easter eggs get to make the peach jump
+  window.__mascotBounce = function () { if (!REDUCED) { bounceV = -9; } else drawStatic(); };
 })();

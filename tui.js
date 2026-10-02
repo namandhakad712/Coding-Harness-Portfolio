@@ -46,6 +46,75 @@ const FILES = [
   "assets/projects/smart-mailto.webp", "assets/tech/react.webp", ".gitignore"
 ];
 
+/* ── easter eggs ────────────────────────────────────────
+   Not in /help, not in the menu — the way real terminals
+   hide things. Found, not told. */
+const EGGS = {
+  "/coffee": async (run) => {
+    const th = thinking("They typed the most important command in computing.");
+    await sleep(700); if (run.cancelled) return th.hold();
+    th.hold("Brewing… no machine, just ASCII and good intentions.");
+    await sleep(300); if (run.cancelled) return;
+    panel(
+      '<pre class="eggart">' +
+"       ( (      \n" +
+"        ) )     \n" +
+"      ........  \n" +
+"      |      |] \n" +
+"      \\      /  \n" +
+"       `----'   \n" +
+"    [][][][]    \n" +
+      "</pre>", "ONE COFFEE, HOLD THE CAFFEINE");
+    if (run.cancelled) return;
+    await streamText(run,
+      "That's the one that ships the portfolio. Thanks for asking nicely — " +
+      "try `/sudo` next if you're feeling brave.");
+  },
+  "/sudo": async (run) => {
+    const th = thinking("Oh? They're trying to elevate privileges in a portfolio.");
+    await sleep(750); if (run.cancelled) return th.hold();
+    th.hold("Checking the sudoers file… delicately.");
+    await sleep(400); if (run.cancelled) return;
+    errLine("naman is not in the sudoers file. This incident will be reported.");
+    await sleep(500); if (run.cancelled) return;
+    await streamText(run,
+      "…reported to the peach. It blinked. You're fine — everything here runs " +
+      "in your own browser anyway, so technically you already own the box.");
+  },
+  "/42": async (run) => {
+    const th = thinking("The answer. They know.");
+    await sleep(600); if (run.cancelled) return th.hold();
+    th.hold("The question is being computed. This may take one conversation.");
+    await sleep(400); if (run.cancelled) return;
+    await streamText(run,
+      "42. Obviously. The real question was `what does Naman build` — and the " +
+      "answer is `/work`, five times over.");
+  },
+  "/xyzzy": async (run) => {
+    const th = thinking("A phrase from caves that predate the web.");
+    await sleep(600); if (run.cancelled) return th.hold();
+    th.hold("Nothing happens here. Which is exactly what happens here.");
+    await sleep(350); if (run.cancelled) return;
+    await streamText(run,
+      "Nothing happens. 🪧 (old-adventurer instinct: correct command, wrong cave.)");
+  },
+  "/rm": async (run) => {
+    const th = thinking("A dangerous little phrase approaches the prompt.");
+    await sleep(700); if (run.cancelled) return th.hold();
+    th.hold("Nice try. The files are read-only and also I like them.");
+    await sleep(350); if (run.cancelled) return;
+    errLine("rm: refusing to remove '/' — nice try, though.");
+    if (run.cancelled) return;
+    await streamText(run,
+      "Everything you see lives in one static repo, so no, we're not doing that. " +
+      "If you must delete something, `/clear` wipes the transcript and even that's reversible-ish.");
+  }
+};
+
+/* Konami code: ↑ ↑ ↓ ↓ ← → ← → B A — the oldest cheat in the book */
+const KONAMI = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+let kIdx = 0;
+
 /* friendly phrases shown while "thinking" — a fresh random order every run */
 const THINK_WORDS = [
   "Wandering through the code…",
@@ -878,6 +947,17 @@ async function submit(raw) {
   const cmdArg = cmd && parts.length > 1 ? parts.slice(1).join(" ") : "";
 
   if (text.startsWith("/") && !cmd) {
+    const egg = EGGS[parts[0]];
+    if (egg) {
+      S.history.push(text); S.histIdx = S.history.length;
+      toActive(); echo(text);
+      input.value = ""; closeMenu();
+      const run = newRun();
+      try { await egg(run); } catch (e) { errLine("Error: " + (e && e.message ? e.message : e)); }
+      S.thinking.forEach((h) => { h.bind(); h.collapse(); });
+      pin();
+      return;
+    }
     S.history.push(text); S.histIdx = S.history.length;
     toActive(); echo(text);
     const run = newRun();
@@ -1077,6 +1157,24 @@ $("guideX").addEventListener("click", () => closeGuide($("guideRemember").checke
 $("guideClose").addEventListener("click", () => closeGuide($("guideRemember").checked));
 $("guideGo").addEventListener("click", () => { closeGuide($("guideRemember").checked); setTimeout(() => submit("/work"), 180); });
 document.addEventListener("click", (e) => { if (!e.target.closest(".prompt")) closeMenu(); });
+
+/* Konami code → a quiet reward (never shown in the menu) */
+document.addEventListener("keydown", (e) => {
+  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  if (k === KONAMI[kIdx]) {
+    kIdx++;
+    if (kIdx === KONAMI.length) {
+      kIdx = 0;
+      panel(
+        '<div class="krow"><b>↑↑↓↓←→←→BA</b><span>cheat code accepted — nothing to cheat, but respect.</span></div>' +
+        '<div class="krow"><b>unlock</b><span>type /coffee, /42, /xyzzy or /sudo — the rest are hidden on purpose</span></div>',
+        "DEVELOPER MODE");
+      if (window.__mascotBounce) window.__mascotBounce();
+    }
+  } else {
+    kIdx = (k === KONAMI[0]) ? 1 : 0;
+  }
+});
 
 /* boot */
 setMode("act");
