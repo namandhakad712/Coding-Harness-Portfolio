@@ -46,7 +46,7 @@ const FILES = [
   "assets/projects/smart-mailto.webp", "assets/tech/react.webp", ".gitignore"
 ];
 
-/* friendly phrases shown while "thinking" */
+/* friendly phrases shown while "thinking" — a fresh random order every run */
 const THINK_WORDS = [
   "Wandering through the code…",
   "Gathering the loose threads…",
@@ -54,8 +54,236 @@ const THINK_WORDS = [
   "Lining up the good parts…",
   "Almost ready…",
   "One more pass, then I'll answer…",
-  "Polishing the last few words…"
+  "Polishing the last few words…",
+  "Sorting signal from noise…",
+  "Warming up the keys…",
+  "Counting down to the good bit…",
+  "Letting it steep a moment…",
+  "Chasing the cleanest sentence…",
+  "Trimming the rough edges…",
+  "Rehearsing the first line…",
+  "Holding the thread steady…",
+  "Dusting off the old favourites…",
+  "Filing thoughts into columns…",
+  "Pouring words out slowly…",
+  "Steeping a moment longer…",
+  "Checking every letter twice…",
+  "Nudging the words into place…",
+  "Sharpening one more pencil…",
+  "Listening for the echo…",
+  "Unstacking the small details…",
+  "Wiping the whiteboard clean…",
+  "Finding the shortest path…",
+  "Brewing something decent…",
+  "Hunting for the right opener…",
+  "Straightening the picture frame…",
+  "Counting the commas…",
+  "Walking the beat once more…",
+  "Tidying the loose ends…",
+  "Saving the best line for last…",
+  "Refilling the ink…",
+  "Sketching the outline first…",
+  "Taking the scenic route…",
+  "Twiddling the last knob…",
+  "Tapping out a rhythm…",
+  "Peeling the first layer…",
+  "Gathering the last crumbs…"
 ];
+function shuffled(a) {
+  const b = a.slice();
+  for (let i = b.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [b[i], b[j]] = [b[j], b[i]];
+  }
+  return b;
+}
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+
+/* ══════════════════════════════════════════════════════
+   SCRIPT POOLS — every command has several complete ways
+   of saying it. A fresh one is chosen on every run, so the
+   thinking lines, tool output and streamed reply are never
+   the same twice.
+   ══════════════════════════════════════════════════════ */
+const SCRIPTS = {
+  work: {
+    think: [
+      ["You want to see real work. I'll pull the project list and lay out each one with its screenshot.",
+       "Five projects, newest first — Smart Mailto and Rankify are the recent ones.",
+       "Five shipped projects, 2023 to 2026. Writing them out now."],
+      ["Projects — the honest section. Pulling the list, images and links together.",
+       "Each card wants a screenshot, a plain description and both links. Laying them side by side.",
+       "Everything's gathered. Here comes the work."],
+      ["Let's show, not tell. Fetching all five entries from data.js.",
+       "Newest first, so Rankify and Smart Mailto lead the way.",
+       "Ready — screenshots and links included."],
+      ["They asked for proof, not promises. Loading the project shelf.",
+       "Five cards: title, year, what it does, and where to try it.",
+       "All set — writing the cards out one by one."],
+      ["Pulling the five projects and their screenshots into view.",
+       "Reading each blurb once so the wording stays human.",
+       "Here's everything I've shipped, oldest habit to newest ship."]
+    ],
+    tool: [
+      ["5 projects · images in ./assets/projects/", "copy rewritten in plain English"],
+      ["PROJECTS[0..4] loaded", "screenshots resolved · links checked"],
+      ["5 entries · titles, years, stacks", "blurb + live/source links ready"]
+    ],
+    intro: [
+      "Here is the work — five things I actually built and shipped, not demos. Each card has a screenshot, a plain description, and links to the live version and the source.",
+      "Five real projects, newest first. Screenshot on each one, a short plain-English summary, and both a live link and the source if you want to read the code.",
+      "This is the shelf: five shipped projects from 2023 to 2026. Every card carries its own screenshot, what it actually does, and links to try it or fork it.",
+      "Everything I've built that's actually live — no mockups, no maybes. Screenshots, honest descriptions, and links to both the demo and the repo."
+    ]
+  },
+  craft: {
+    think: [
+      ["Load the stack and explain each tool the way I'd explain it to a friend.",
+       "Three groups — what the work feels like, what holds it up, and what ships it.",
+       "Here's the stack, in plain words instead of buzzwords."],
+      ["Tools time. Only the ones that survived real deadlines stay on the list.",
+       "Grouped by where they show up: hands, backbone, delivery.",
+       "No logo wall — just honest notes on each one."],
+      ["Let's keep this grounded — the stack, minus the marketing words.",
+       "Frontend is the feel, backend is the bones, deployment is the runway.",
+       "Ready to lay it out, one tool at a time."],
+      ["They want the toolkit. I'll say what each piece is actually for.",
+       "Three shelves: the everyday stuff, the quiet workers, the shipping gear.",
+       "Here's the stack as I really use it."]
+    ],
+    intro: [
+      "Tools are opinions. These are the ones I've earned — if something stops helping me ship better work, it stops being on this list.",
+      "Here's the honest stack — only what I reach for by default, grouped by where it shows up in the work, with a plain note on each.",
+      "Three groups: what the work feels like, what holds it up, and what ships it. No badges, no fan clubs — just the tools that earn their place.",
+      "This is the gear behind everything on the shelf above. Each entry says what it's for in normal words, not résumé words."
+    ]
+  },
+  about: {
+    think: [
+      ["Assemble the bio, the timeline, and the things that matter to me.",
+       "Quote first, then the story, then the short facts people skim.",
+       "Here's the person behind the commits."],
+      ["They want the human, not the headline. Pulling the timeline forward.",
+       "Self-taught, shipping since 2023 — the milestones read short and true.",
+       "Bio, timeline and quick facts — laying them out now."],
+      ["Let's keep it honest: where I started, what I've done, what I'm chasing.",
+       "The quote says most of it. The timeline fills in the rest.",
+       "Ready — here's who's behind the keyboard."],
+      ["Pull the bio and the milestones, keep the fluff out.",
+       "Two short paragraphs, a timeline, a few quick facts.",
+       "Writing it the way I'd say it out loud."]
+    ],
+    intro: [
+      "The short version: I taught myself to build things for the web, kept shipping, and haven't stopped since. Full story below.",
+      "Here's the person behind the code — where I started, what I've shipped along the way, and what I'm aiming at next.",
+      "Behind every project above is someone who reads docs at 1am and rewrote this bio four times. This is that someone.",
+      "The human page: a couple of honest paragraphs, a short timeline, and the quick facts worth knowing."
+    ]
+  },
+  contact: {
+    think: [
+      ["Lay out the ways to reach me — email, GitHub, LinkedIn.",
+       "Keep it simple: three links, no forms, no funnels.",
+       "Here's how to reach me — everything's one click away."],
+      ["They want to talk. Making the email the loudest thing on screen.",
+       "Reading everything myself — no bot, no autoresponder.",
+       "Contact details laid out, links included."],
+      ["Make it easy: email first, profiles after, base last.",
+       "No contact form to bounce off — just direct lines.",
+       "Here are the ways in."],
+      ["Time to hand over the keys — email, GitHub, LinkedIn, location.",
+       "Fastest route is plain email. I actually read it.",
+       "All laid out below."]
+    ],
+    intro: [
+      "Say hello — I read everything myself, no bot on the other end.",
+      "Three direct lines below. Email is the fast one; I reply to all of them personally.",
+      "No forms, no waiting rooms — pick whichever link suits you. I'm online more than I should be.",
+      "Here's where to find me. The email reaches me directly; the profiles show the work while you wait."
+    ]
+  },
+  help: {
+    think: [
+      ["Explain how this little terminal works, in the friendliest way I can.",
+       "Commands first, then the keys worth remembering.",
+       "A short tour of the controls."],
+      ["New here? Give them the gentle version — no manual-speak.",
+       "Type / and pick, click a chip, press Esc to stop. That's the core.",
+       "Controls laid out, jargon kept out."],
+      ["Walk them through the window like a host, not a spec sheet.",
+       "Slash for commands, at-sign for files, question mark for this guide.",
+       "Here's everything worth knowing, short and sweet."],
+      ["Keep it warm: this terminal is a portfolio wearing a costume.",
+       "Streaming answers, collapsible thoughts, a mascot that follows the cursor.",
+       "Tour complete — keys below."]
+    ],
+    intro: [
+      "This is my portfolio dressed as a coding terminal. You type a command, I think out loud for a moment, then the answer streams in — thoughts stay readable but fold away once the reply is complete.",
+      "Think of it as a chat window with a scripted brain: pick a command (or click a chip), watch the thought process open up, then read the answer as it streams. Nothing you type leaves your browser.",
+      "A tiny terminal with a handful of commands. Each one opens a thought block you can watch or collapse, then streams an answer with real screenshots and links.",
+      "Everything happens right here in this window — like chatting with a coding assistant, except the answers are about me and my work. Press Esc anytime to stop an answer mid-stream."
+    ]
+  },
+  free: {
+    think: [
+      ["Reading the request: {q}. Figuring out the best way to answer it.",
+       "No command matched directly — finding the closest honest answer.",
+       "Answering with what I actually know."],
+      ["Free-form question. Weighing which corner of the portfolio fits best.",
+       "Somewhere between the project shelf and the contact card.",
+       "Giving them the useful version, not a deflection."],
+      ["Parsed: {q}. Checking it against what this terminal can do.",
+       "Closest match found — keeping the reply short and pointing the rest.",
+       "Here's the answer and where to go next."],
+      ["They didn't reach for a slash — that's fine, answering directly.",
+       "Routing it through the same honest filter as everything else.",
+       "Reply shaped and ready."]
+    ],
+    hire: [
+      "Yes — I'm available for freelance and product work, remote worldwide. The fastest way to reach me is {email}, or type /contact and I'll lay everything out.",
+      "I'm open to freelance and full-time conversations, remote-friendly from India. Quickest route: {email} — or run /contact for every link at once.",
+      "Available, yes — client work, product work, or something in between. Drop me a line at {email} (I read it myself) or type /contact for the full card.",
+      "I'm taking on new work right now. Best first move is an email to {email}; /contact also stacks email, GitHub and LinkedIn in one view."
+    ],
+    project: [
+      "Sure — here's everything I've shipped, newest first. Screenshots included.",
+      "Below: five real projects with screenshots, plain descriptions and live links. Newest first.",
+      "Loading the project shelf — every card has a screenshot and both links.",
+      "Here's the work. Five shipped projects, screenshots and links on each."
+    ],
+    stack: [
+      "Happy to. Here's the stack, grouped by where it shows up in the work.",
+      "The tools, in three honest groups — what it feels like, what holds it up, what ships it.",
+      "Here's the gear I actually use, with a plain-English note on each piece.",
+      "Stack below: grouped by role, stripped of the buzzwords."
+    ],
+    who: [
+      "Short version: self-taught web developer from India, shipping since 2023. Type /about for the full timeline.",
+      "I'm Naman — I build things for the web and keep shipping them. /about has the whole story if you want it.",
+      "A developer who taught himself by building, not by watching. /about lays out the timeline and quick facts.",
+      "Someone who likes clean interfaces and honest descriptions — like this one. Full bio via /about."
+    ],
+    nudge: [
+      "I'm a small terminal with a handful of commands rather than a full chatbot, so that one went over my head. Try /work for projects, /craft for the stack, /about for my story, or /contact to say hello.",
+      "That one's outside my little vocabulary — I only know a few words. Try /work, /craft, /about or /contact, and I'll show you something good.",
+      "Honest answer: I don't have a script for that. I do know /work, /craft, /about and /contact — any of those will get you somewhere.",
+      "I'm a scripted terminal, not a real model, so that flew past me. Point me at /work, /craft, /about or /contact instead and I'll deliver."
+    ],
+    greet: [
+      "Hello! 👋 This is my portfolio — a little terminal that answers with real work. Type / (or click a chip) to start: /work, /craft, /about, /contact.",
+      "Hey — good to meet you. Poke around: /work shows five shipped projects, /about tells you who I am, /contact hands over the links.",
+      "Hi! You're talking to a portfolio pretending to be a coding assistant. Nothing is sent anywhere — try /work or /about to get going.",
+      "Welcome in. Type / for the command list, or just click a chip under the mascot. My favourite opening line is /work."
+    ]
+  }
+};
+
+/* fill {q}/{email} placeholders in a picked script line */
+function fill(t, map) {
+  let s = t;
+  for (const k in map) s = s.split("{" + k + "}").join(map[k]);
+  return s;
+}
 
 /* ══════════════════════════════════════════════════════
    TRANSCRIPT PRIMITIVES
@@ -88,14 +316,19 @@ function thinking(seed) {
   let live = true;
 
   const frames = ["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"];
-  let fi = 0, wordIdx = 0, wordTimer = null, spinTimer = null;
+  let fi = 0;
+  /* every thinking block gets its OWN shuffled phrase order,
+     starting at a random offset — no two runs say the same thing */
+  const words = shuffled(THINK_WORDS);
+  let wordIdx = Math.floor(Math.random() * words.length);
+  let wordTimer = null, spinTimer = null;
   const startWords = setTimeout(() => {                       // pretty words kick in
     if (!live) return;
     wordTimer = setInterval(() => {
       if (!live) return;
-      wordIdx = (wordIdx + 1) % THINK_WORDS.length;
+      wordIdx = (wordIdx + 1) % words.length;
       const w = d.querySelector(".think__word");
-      if (w) { w.style.opacity = "0"; setTimeout(() => { if (w.isConnected) { w.textContent = THINK_WORDS[wordIdx]; w.style.opacity = "1"; } }, 160); }
+      if (w) { w.style.opacity = "0"; setTimeout(() => { if (w.isConnected) { w.textContent = words[wordIdx]; w.style.opacity = "1"; } }, 160); }
     }, 1500);
   }, 900);
 
@@ -268,11 +501,14 @@ function projectCard(p, i) {
     '<div class="proj__hd"><span class="num">' + String(i + 1).padStart(2, "0") + "</span>" +
     "<b>" + esc(p.title) + '</b><span class="yr">' + p.year + "</span>" +
     '<span class="tags">' + esc(p.tags) + "</span></div>" +
+    '<div class="proj__body">' +
     '<img class="proj__img" alt="' + esc(p.title) + ' screenshot" loading="lazy" src="' + p.img + '" />' +
+    '<div class="proj__info">' +
     '<p class="proj__txt">' + esc(p.blurb) + "</p>" +
     '<div class="proj__stack">↳ ' + esc(p.stack) + "</div>" +
     '<div class="proj__links"><a class="hot" href="' + p.live + '" target="_blank" rel="noopener">live demo ↗</a>' +
-    '<a href="' + p.repo + '" target="_blank" rel="noopener">source code</a></div>';
+    '<a href="' + p.repo + '" target="_blank" rel="noopener">source code</a></div>' +
+    "</div></div>";
   transcript.appendChild(d);
   const img = d.querySelector(".proj__img");
   img.addEventListener("load", () => { img.classList.add("in"); pin(); });
@@ -296,20 +532,19 @@ function newRun() {
    ══════════════════════════════════════════════════════ */
 
 async function runWork(run) {
-  const th = thinking("You want to see real work. I'll pull the project list and lay out each one with its screenshot.");
+  const sc = pick(SCRIPTS.work.think);
+  const th = thinking(sc[0]);
   await sleep(760); if (run.cancelled) return th.hold();
-  th.set("Five projects, newest first — Smart Mailto and Rankify are the recent ones.");
+  th.set(sc[1]);
   await sleep(700); if (run.cancelled) return th.hold();
-  th.hold("Five shipped projects, 2023 to 2026. Writing them out now.");
+  th.hold(sc[2]);
   await sleep(240); if (run.cancelled) return;
 
-  const t = toolCall("read", "data.js", ["5 projects · images in ./assets/projects/", "copy rewritten in plain English"]);
+  const t = toolCall("read", "data.js", pick(SCRIPTS.work.tool));
   await sleep(560); if (run.cancelled) return t.expand();
   t.expand();
 
-  await streamText(run,
-    "Here is the work — five things I actually built and shipped, not demos. " +
-    "Each card has a screenshot, a plain description, and links to the live version and the source.");
+  await streamText(run, pick(SCRIPTS.work.intro));
   if (run.cancelled) return;
 
   for (let i = 0; i < PROJECTS.length; i++) {
@@ -320,15 +555,15 @@ async function runWork(run) {
 }
 
 async function runCraft(run) {
-  const th = thinking("Load the stack and explain each tool the way I'd explain it to a friend.");
+  const sc = pick(SCRIPTS.craft.think);
+  const th = thinking(sc[0]);
   await sleep(740); if (run.cancelled) return th.hold();
-  th.set("Three groups — what the work feels like, what holds it up, and what ships it.");
+  th.set(sc[1]);
   await sleep(640); if (run.cancelled) return th.hold();
-  th.hold("Here's the stack, in plain words instead of buzzwords.");
+  th.hold(sc[2]);
   await sleep(220); if (run.cancelled) return;
 
-  await streamText(run,
-    "Tools are opinions. These are the ones I've earned — if something stops helping me ship better work, it stops being on this list.");
+  await streamText(run, pick(SCRIPTS.craft.intro));
   if (run.cancelled) return;
 
   CRAFT.forEach((g) => {
@@ -340,11 +575,16 @@ async function runCraft(run) {
 }
 
 async function runAbout(run) {
-  const th = thinking("Assemble the bio, the timeline, and the things that matter to me.");
+  const sc = pick(SCRIPTS.about.think);
+  const th = thinking(sc[0]);
   await sleep(720); if (run.cancelled) return th.hold();
+  th.set(sc[1]);
+  await sleep(520); if (run.cancelled) return th.hold();
   th.hold(ABOUT.quote);
   await sleep(240); if (run.cancelled) return;
 
+  await streamText(run, pick(SCRIPTS.about.intro));
+  if (run.cancelled) return;
   await streamText(run, ABOUT.bio[0]);
   if (run.cancelled) return;
   await streamText(run, ABOUT.bio[1]);
@@ -359,12 +599,15 @@ async function runAbout(run) {
 }
 
 async function runContact(run) {
-  const th = thinking("Lay out the ways to reach me — email, GitHub, LinkedIn.");
+  const sc = pick(SCRIPTS.contact.think);
+  const th = thinking(sc[0]);
   await sleep(640); if (run.cancelled) return th.hold();
+  th.set(sc[1]);
+  await sleep(520); if (run.cancelled) return th.hold();
   th.hold(CONTACT.line);
   await sleep(220); if (run.cancelled) return;
 
-  await streamText(run, "Say hello — I read everything myself, no bot on the other end.");
+  await streamText(run, pick(SCRIPTS.contact.intro));
   if (run.cancelled) return;
 
   panel(
@@ -376,14 +619,15 @@ async function runContact(run) {
 }
 
 async function runHelp(run) {
-  const th = thinking("Explain how this little terminal works, in the friendliest way I can.");
+  const sc = pick(SCRIPTS.help.think);
+  const th = thinking(sc[0]);
   await sleep(600); if (run.cancelled) return th.hold();
-  th.hold("A short tour of the controls.");
+  th.set(sc[1]);
+  await sleep(500); if (run.cancelled) return th.hold();
+  th.hold(sc[2]);
   await sleep(200); if (run.cancelled) return;
 
-  await streamText(run,
-    "This is my portfolio dressed as a coding terminal. You type a command, I think out loud for a moment, " +
-    "then the answer streams in — thoughts stay readable but fold away once the reply is complete.");
+  await streamText(run, pick(SCRIPTS.help.intro));
   if (run.cancelled) return;
 
   const keys = [
@@ -435,24 +679,29 @@ async function runUndo() {
 /* free text → a short harness-style answer */
 async function runFree(run, text) {
   const q = text.toLowerCase();
-  const th = thinking("Reading the request: " + JSON.stringify(text) + ". Figuring out the best way to answer it.");
+  const sc = pick(SCRIPTS.free.think);
+  const th = thinking(fill(sc[0], { q: JSON.stringify(text) }));
   await sleep(900); if (run.cancelled) return th.hold();
 
   // simple, honest routing — no fake backend
+  if (/^(hi|hello|hey|yo|namaste|sup)\b/.test(q.trim())) {
+    th.hold("A greeting — welcome them and point at the commands.");
+    await sleep(240); if (run.cancelled) return;
+    await streamText(run, pick(SCRIPTS.free.greet));
+    return;
+  }
   if (/(hire|work with|available|freelance|job)/.test(q)) {
     th.hold("They're asking about availability — point them at the contact block.");
     await sleep(240); if (run.cancelled) return;
-    await streamText(run,
-      "Yes — I'm available for freelance and product work, remote worldwide. " +
-      "The fastest way to reach me is " + CONTACT.email + ", or type /contact and I'll lay everything out.");
+    await streamText(run, fill(pick(SCRIPTS.free.hire), { email: CONTACT.email }));
     return;
   }
   if (/(project|built|made|work|portfolio|ship)/.test(q)) {
     th.hold("They want the work — pull up the five projects with screenshots.");
     await sleep(240); if (run.cancelled) return;
-    await streamText(run, "Sure — here's everything I've shipped, newest first. Screenshots included.");
+    await streamText(run, pick(SCRIPTS.free.project));
     if (run.cancelled) return;
-    const t = toolCall("read", "data.js", ["5 projects found"]);
+    const t = toolCall("read", "data.js", pick(SCRIPTS.work.tool));
     await sleep(520); t.expand();
     for (let i = 0; i < PROJECTS.length; i++) {
       if (run.cancelled) return;
@@ -464,7 +713,7 @@ async function runFree(run, text) {
   if (/(stack|tool|use|tech|language|framework)/.test(q)) {
     th.hold("Stack question — walk the three groups in plain words.");
     await sleep(240); if (run.cancelled) return;
-    await streamText(run, "Happy to. Here's the stack, grouped by where it shows up in the work.");
+    await streamText(run, pick(SCRIPTS.free.stack));
     if (run.cancelled) return;
     CRAFT.forEach((g) => {
       const rows = g.items.map((i) =>
@@ -477,15 +726,13 @@ async function runFree(run, text) {
   if (/(who|you|yourself|about|naman|bio)/.test(q)) {
     th.hold("A short introduction, in their own voice.");
     await sleep(240); if (run.cancelled) return;
-    await streamText(run, ABOUT.bio[0] + " Type /about for the full timeline.");
+    await streamText(run, pick(SCRIPTS.free.who));
     return;
   }
 
-  th.hold("Give a warm nudge toward the commands.");
+  th.hold(sc[1]);
   await sleep(240); if (run.cancelled) return;
-  await streamText(run,
-    "I'm a small terminal with a handful of commands rather than a full chatbot, so that one went over my head. " +
-    "Try /work for projects, /craft for the stack, /about for my story, or /contact to say hello.");
+  await streamText(run, pick(SCRIPTS.free.nudge));
 }
 
 /* ══════════════════════════════════════════════════════
@@ -566,6 +813,19 @@ function newSession() {
   input.value = "";
   input.placeholder = S.mode === "plan" ? "Plan something..." : "What can I do for you?";
   closeMenu();
+  requestAnimationFrame(() => { if (window.__mascotResize) window.__mascotResize(); });
+  input.focus();
+}
+
+/* top-bar ‹ back button — collapse the session and return to the start
+   screen. The transcript is kept, so pressing back doesn't lose the
+   conversation: typing again picks it right back up. */
+function goBack() {
+  if (S.run) S.run.cancelled = true;
+  if (body.dataset.state !== "active") return;
+  body.dataset.state = "idle";
+  closeMenu();
+  input.value = "";
   requestAnimationFrame(() => { if (window.__mascotResize) window.__mascotResize(); });
   input.focus();
 }
@@ -684,6 +944,10 @@ function closeGuide(remember) {
   try { if (remember) localStorage.setItem("pt-guide-seen", "1"); } catch (e) {}
   input.focus();
 }
+/* click anywhere outside the box (or ✕, Esc, Close) dismisses it */
+guide.addEventListener("click", (e) => {
+  if (e.target === guide) closeGuide($("guideRemember").checked);
+});
 
 /* ══════════════════════════════════════════════════════
    EVENTS
@@ -756,6 +1020,7 @@ toggle.addEventListener("click", (e) => { const o = e.target.closest(".opt"); if
 autoBtn.addEventListener("click", () => setAuto(!S.autoAnswer));
 autoBtn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setAuto(!S.autoAnswer); } });
 $("chips").addEventListener("click", (e) => { const b = e.target.closest(".chip"); if (b) submit(b.dataset.cmd); });
+$("backBtn").addEventListener("click", goBack);
 $("helpBtn").addEventListener("click", openGuide);
 $("guideX").addEventListener("click", () => closeGuide($("guideRemember").checked));
 $("guideClose").addEventListener("click", () => closeGuide($("guideRemember").checked));

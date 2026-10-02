@@ -16,7 +16,9 @@
 <body data-theme="harness" data-state="idle">
 
 <header class="topbar">
-  <span class="topbar__l">✕ Naman Dhakad</span>
+  <button class="topbar__l topbar__back" id="backBtn" title="Back to the start screen">
+    <span class="topbar__arr">‹</span> Naman Dhakad
+  </button>
   <span class="topbar__c">~/portfolio — main</span>
   <button class="topbar__help" id="helpBtn" title="How to use this site (?)">? help</button>
 </header>
@@ -30,7 +32,7 @@
   <div class="idle" id="idle">
     <canvas id="mascot" class="mascot" aria-label="Interactive 3D ASCII mascot — move your cursor"></canvas>
     <h1 class="idle__q">What can I do for you?</h1>
-    <p class="idle__hint">Type / for commands, @ to mention a file, Ctrl+P for the list</p>
+    <p class="idle__hint">Click a chip, or type / and press enter — the reply streams in</p>
     <div class="chips" id="chips">
       <button class="chip" data-cmd="/work">/work</button>
       <button class="chip" data-cmd="/craft">/craft</button>
@@ -85,11 +87,12 @@
     </div>
 
     <ul class="guide__list">
-      <li><b>Type <i>/</i></b> or click a chip below the mascot to run a command.</li>
-      <li><b>Type <i>@</i></b> to mention a file, the way you would in a chat.</li>
-      <li><b>Press <i>Tab</i></b> to switch between <i>Plan</i> (just talk) and <i>Act</i> (do things).</li>
-      <li><b>Press <i>Esc</i></b> to stop an answer mid-way. <b><i>?</i></b> reopens this guide.</li>
-      <li>Move your mouse over the mascot — it follows you around.</li>
+      <li><b>Click a chip</b> below the mascot — like <i>/work</i> — and watch the answer appear.</li>
+      <li><b>Or just start typing.</b> Type <i>/</i> and a list of commands pops up to pick from.</li>
+      <li><b>Ask in your own words too</b> — like <i>"show me your projects"</i> — it works the same way.</li>
+      <li><b>Click any thought</b> to fold it away or open it again. Nothing is hidden for good.</li>
+      <li><b>The <i>‹</i> up top</b> takes you back to the start screen without losing anything.</li>
+      <li>Move your mouse near the little creature — it follows you around.</li>
     </ul>
 
     <div class="guide__ft">

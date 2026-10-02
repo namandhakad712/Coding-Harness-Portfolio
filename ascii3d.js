@@ -1,6 +1,6 @@
 /* ══════════════════════════════════════════════════════════════
    ascii3d.js — the cursor-following ASCII mascot (v2, analytic)
-   A round peach blob with a sprout, eyes, smile and blush.
+   A round peach blob with a sprout, big cartoon eyes and blush.
    Instead of rasterising thousands of random points (which looked
    like noise), the body is solved ANALYTICALLY per grid cell:
      · silhouette = ellipse (wider at the bottom, flat base)
@@ -26,13 +26,11 @@
     mint:  [196, 244, 222],
     leaf:  [122, 226, 148],
     stem:  [104, 204, 130],
-    dark:  [24, 14, 12],
-    blush: [255, 96, 122],
-    glint: [255, 255, 255]
+    blush: [255, 96, 122]
   };
-  var BASES = ["peach", "mint", "leaf", "stem", "dark", "blush", "glint"];
+  var BASES = ["peach", "mint", "leaf", "stem", "blush"];
   var STEPS = 6;
-  var FLAT = { dark: 1, glint: 1 };          // these ignore shading
+  var FLAT = {};                            // (reserved) bases that ignore shading
 
   /* precomputed colour strings: base × brightness step */
   var COLORS = [];
@@ -54,9 +52,13 @@
       BUCKET[BASES[bi] + si] = bi * STEPS + si;
 
   /* ── creature definition (object space, Y up) ───────── */
-  var EYES = [[-0.31, 0.27, 0.907], [0.31, 0.27, 0.907]];
-  var EYE_R = 0.21;
-  var BLUSH = [[-0.60, -0.14, 0.790], [0.60, -0.14, 0.790]];
+  /* big old-cartoon eyes: smooth white disc + dark pupil that tracks the
+     gaze. Drawn as vector circles after the ASCII flush, so they stay
+     crisp. No mouth — the eyes and blush carry the whole face. */
+  var EYES = [[-0.30, 0.26, 0.918], [0.30, 0.26, 0.918]];
+  var EYE_R = 0.30;
+  var PUP_R = 0.155;
+  var BLUSH = [[-0.62, -0.14, 0.772], [0.62, -0.14, 0.772]];
   var BLUSH_R = 0.14;
 
   /* ── state ──────────────────────────────────────────── */
@@ -168,8 +170,8 @@
     /* pointer smoothing */
     ptr.x += (ptr.tx - ptr.x) * 0.10;
     ptr.y += (ptr.ty - ptr.y) * 0.10;
-    rot.x += (rot.tx - rot.x) * 0.055;
-    rot.y += (rot.ty - rot.y) * 0.055;
+    rot.x += (rot.tx - rot.x) * 0.085;   // rot.x ← horizontal target (yaw)
+    rot.y += (rot.ty - rot.y) * 0.085;   // rot.y ← vertical target (pitch)
 
     /* click squash spring */
     if (!REDUCED) {
@@ -180,8 +182,10 @@
     /* slow idle sway when the cursor is away */
     var idleYaw = ptr.on ? 0 : Math.sin(t * 0.38) * 0.16;
     var idlePit = ptr.on ? 0 : Math.sin(t * 0.27) * 0.06;
-    var yaw = rot.y + idleYaw;
-    var pitch = rot.x + idlePit;
+    /* rot.x holds the HORIZONTAL pointer offset → yaw;
+       rot.y holds the VERTICAL pointer offset → pitch. (was swapped) */
+    var yaw = rot.x + idleYaw;
+    var pitch = rot.y + idlePit;
     cY = Math.cos(yaw); sY = Math.sin(yaw);
     cP = Math.cos(pitch); sP = Math.sin(pitch);
 
@@ -216,15 +220,6 @@
     var blushPts = [];
     for (i = 0; i < BLUSH.length; i++) blushPts.push(project(BLUSH[i][0], BLUSH[i][1], BLUSH[i][2]));
 
-    /* smile polyline */
-    var smile = [];
-    for (i = 0; i <= 20; i++) {
-      var mx = -0.16 + (i / 20) * 0.32;
-      var my = -0.10 + 6 * mx * mx;
-      var mz = Math.sqrt(Math.max(0, 1 - mx * mx - my * my)) * 0.98;
-      smile.push(project(mx, my, mz));
-    }
-
     /* ── buckets of cells, grouped by colour for few fillStyle changes ── */
     var NB = BASES.length * STEPS;
     var buckets = [];
@@ -249,7 +244,6 @@
 
     var eyeRadX = EYE_R * sE, eyeRadY = EYE_R * sE * bk;
     var blushRad = BLUSH_R * sE;
-    var smileThr = Math.max(4, cellH * 0.38);
     var hoverR = 2.1 * sE;
 
     var c, r;
@@ -288,30 +282,12 @@
         var step = Math.max(0, Math.min(STEPS - 1,
           Math.round((bri - 0.74) / 0.26 * (STEPS - 1))));
 
-        /* priority overlays: blush → smile → eyes → glint */
+        /* blush sits under the eyes (ASCII cells) */
         var overlay = false;
         for (i = 0; i < blushPts.length; i++) {
           var bdx = sx - blushPts[i][0], bdy = sy - blushPts[i][1];
           if ((bdx * bdx) / (blushRad * blushRad) + (bdy * bdy) / (blushRad * blushRad) <= 1) {
             base = "blush"; ch = "@"; step = 2; overlay = true; break;
-          }
-        }
-        if (!overlay) {
-          for (i = 0; i < smile.length; i++) {
-            if (i > 0 && segDist(sx, sy, smile[i - 1][0], smile[i - 1][1], smile[i][0], smile[i][1]) < smileThr) {
-              base = "dark"; ch = "@"; step = 0; overlay = true; break;
-            }
-          }
-        }
-        if (!overlay) {
-          for (i = 0; i < eyePts.length; i++) {
-            var edx = sx - eyePts[i][0], edy = sy - eyePts[i][1];
-            if ((edx * edx) / (eyeRadX * eyeRadX) + (edy * edy) / (eyeRadY * eyeRadY + 0.0001) <= 1) {
-              base = "dark"; ch = "@"; step = 0; overlay = true;
-              /* sparkle: the upper-left quadrant of the eye gets a glint */
-              if (edx < -eyeRadX * 0.15 && edy < -eyeRadY * 0.15) { base = "glint"; ch = "."; }
-              break;
-            }
           }
         }
         occ[r * cols + c] = 1;
@@ -391,6 +367,41 @@
           (list[j] + 0.5) * cellW, list[j + 1] * cellH + cellH * 0.5);
       }
     }
+
+    /* ── vector eyes: big white discs + dark pupils that follow the cursor.
+          Drawn as smooth circles (not ASCII cells) so they read as clean,
+          old-cartoon eyes against the textured body. ── */
+    var pdx, pdy;
+    if (ptr.on && rect) {
+      pdx = Math.max(-1, Math.min(1, (ptr.x - cxE) / (W * 0.35)));
+      pdy = Math.max(-1, Math.min(1, (ptr.y - cyE) / (H * 0.45)));
+    } else {
+      pdx = Math.sin(t * 0.50) * 0.32;              // idle wander
+      pdy = Math.cos(t * 0.41) * 0.22;
+    }
+    var gazeR = (EYE_R - PUP_R) * sE * 0.52;
+    for (i = 0; i < eyePts.length; i++) {
+      var ex = eyePts[i][0], ey = eyePts[i][1];
+      var wry = eyeRadX * bk;                        // blink squashes the disc
+      if (wry < 1) continue;
+
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath(); ctx.ellipse(ex, ey, eyeRadX, wry, 0, 0, Math.PI * 2); ctx.fill();
+
+      var prx = Math.min(PUP_R * sE, eyeRadX * 0.62);
+      var pry = Math.max(Math.min(PUP_R * sE, wry * 0.62), pupMin(bk));
+      var px = ex + pdx * gazeR, py = ey + pdy * gazeR * 0.75;
+      ctx.fillStyle = "#16100e";
+      ctx.beginPath(); ctx.ellipse(px, py, prx, pry, 0, 0, Math.PI * 2); ctx.fill();
+
+      if (bk > 0.6) {                               // classic single glint
+        ctx.fillStyle = "rgba(255,255,255,.95)";
+        ctx.beginPath();
+        ctx.arc(px - prx * 0.30, py - pry * 0.38, prx * 0.30, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    function pupMin(b) { return b < 1 ? 1.5 : 0; }   // pupil never fully vanishes
   }
 
   function start() {
