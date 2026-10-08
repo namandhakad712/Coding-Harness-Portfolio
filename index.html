@@ -16,6 +16,13 @@
 </head>
 <body data-theme="harness" data-state="idle">
 
+<!-- boot screen, js fills the lines -->
+<div class="boot" id="boot" aria-hidden="true">
+  <pre class="boot__lines" id="bootLines"></pre>
+  <div class="boot__skip">click anywhere to skip</div>
+</div>
+<noscript><style>.boot{display:none}</style></noscript>
+
 <header class="topbar">
   <button class="topbar__l topbar__back" id="backBtn" title="Back to the start screen">
     <span class="topbar__arr">‹</span> Naman Dhakad
