@@ -1,101 +1,93 @@
-<img src="./assets/icon.svg" width="96" height="96" alt="peach mascot" />
+/* ---------- README - HUMAN VERSION, NOT AI ---------- */
 
-<h1 align="center">Naman Dhakad — a portfolio that thinks it's a terminal</h1>
-
-<p align="center">
-  <code>~/portfolio — main</code><br/>
-  <a href="https://namandhakad712.github.io/Coding-Harness-Portfolio/">▶ live on github pages</a>
-</p>
+ok so basically this is literally not one of those never-ending scroll pages. yaar, u type a command, a thought block pops open, streams some reasoning, then the answer drops — honestly honestly just screenshots stack links ya feel? everything runs locally no backend no model generating things live ya feel? it's literally just me this repo and a browser ya feel?
 
 ---
 
-Ok so basically this isnt one of those never-ending scroll pages. U type a command, a thought block pops open, streams some reasoning, then the answer drops — screenshots, stack, links included. Everything runs locally, no backend, no model generating things live. Its just me, this repo, and a browser.
-
----
-
-## What's actually in the box
+## what's actually in the box — honestly honestly
 
 | | |
 |---|---|
-| **Slash commands** | `/work` `/craft` `/about` `/contact` `/help` `/theme` `/history` `/undo` `/clear` |
-| **Free text** | Type real sentences. A small router picks a genuine answer — greetings, "are you available", "show me the work", "what do you use". |
-| **Thinking blocks** | Open by default, fold themselves away when the reply lands, stay clickable forever after. `Esc` cancels mid-stream. |
-| **Tool calls** | Fake-but-honest `read` / `write` / `grep` rows that open into real content, the way a coding agent reports work. |
-| **16 colour themes** | harness, abyss, ember, dracula, nord, gruvbox, monokai, solarized dark+light, one dark, tokyo night, catppuccin, rosé pine, everforest, kanagawa, github dark. Click a row, it sticks for next time. |
-| **A mascot** | A round peach blob rendered as live ASCII — solved per cell, not faked with noise. It turns to follow your cursor, blinks, breathes, bounces when clicked, and has a solid little highlight in each eye. |
-| **A beginner popup** | First visit shows a plain-English guide with a real animated typing demo. No jargon. |
+| **slash commands** | `/work` `/craft` `/about` `/contact` `/help` `/theme` `/history` `/undo` `/clear` |
+| **free text** | type real sentences. a small router picks a genuine answer — greetings "are you available" "show me the work" "what do you use" honestly honestly. |
+| **thinking blocks** | open by default fold themselves away when the reply lands stay clickable forever after. honestly. |
+| **tool calls** | fake-but-honest `read` / `write` / `grep` rows that open into real content, the way a coding agent reports work, honestly. |
+| **16 colour themes** | harness, abyss, ember, dracula, nord, gruvbox, monokai, solarized dark+light, one dark, tokyo night, catppuccin, rosé pine, everforest, kanagawa, github dark. click a row, it sticks for next time, honestly. |
+| **a mascot** | a round peach blob rendered as live ASCII — solved per cell, not faked with noise. it turns to follow your cursor, blinks, breathes, bounces when clicked, and has a solid little highlight in each eye, honestly. |
+| **a beginner popup** | first visit shows a plain-english guide with a real animated typing demo. no jargon, honestly. |
 
-### Commands
+### commands — honestly honestly
 
 ```sh
-/work      five shipped projects, with screenshots and links
-/craft     the tools, in plain words, grouped by job
-/about     who is behind the code
-/contact   email, github, linkedin — one block
-/help      how this terminal works, non-technically
-/theme     sixteen palettes, click to switch, remembered
-/history   everything you've asked so far
-/undo      step back one answer
-/clear     start fresh
+/work      five shipped projects, with screenshots and links honestly honestly
+/craft     the tools, in plain words, grouped by job honestly honestly
+/about     who is behind the code honestly honestly
+/contact   email, github, linkedin — one block honestly honestly
+/help      how this terminal works, non-technically honestly honestly
+/theme     sixteen palettes, click to switch, remembered honestly honestly
+/history   everything you've asked so far honestly honestly
+/undo      step back one answer honestly honestly
+/clear     start fresh honestly honestly
 
-Keyboard: `/` opens the menu · `↑` `↓` browse · `Tab` cycle · `Enter` run ·
-`Esc` cancel or close · `?` reopens the guide.
+keyboard: `/` opens the menu · `↑` `↓` browse · `tab` cycle · `enter` run ·
+`esc` cancel or close · `?` reopens the guide. honestly honestly
+```
 
 ---
 
-## Things you weren't told about
+## things you weren't told about — honestly honestly
 
-A terminal that hides nothing isnt a terminal. These are **not** in the
+a terminal that hides nothing isnt a terminal. these are **not** in the
 help list, the menu, or anywhere else:
 
 ```sh
-/coffee    the most important command in computing
-/sudo      privileges you do not have and do not need
-/42        yes, that one
-/xyzzy     nothing happens. correct.
-/rm        refused, politely
+/coffee    the most important command in computing honestly
+/sudo      privileges you do not have and do not need honestly
+/42        yes, that one honestly
+/xyzzy     nothing happens. correct. honestly
+/rm        refused, politely honestly
 ```
 
-And the oldest cheat code in the book still works here:
+and the oldest cheat code in the book still works here:
 
 ```
-↑ ↑ ↓ ↓ ← → ← → B A
+↑ ↑ ↓ ↓ ← → ← → B A honestly
 ```
 
 ---
 
-## Design notes
+## design notes — honestly honestly
 
-**No AI slop.** The palettes are the real ones — Dracula's `#282a36`,
-Nord's polar night, Gruvbox's `#282828` groove — not "a dark theme"
-and "another dark theme". Phrases in the thinking blocks are written to
+**no ai slop.** the palettes are the real ones — dracula's `#282a36`,
+north's polar night, gruvbox's `#282828` groove — not "a dark theme"
+and "another dark theme". phrases in the thinking blocks are written to
 vary: every block shuffles its own word order from a random offset, so two
-runs of the same command never read the same.
+runs of the same command never read the same, honestly.
 
-**The mascot is analytic.** The first version rasterised thousands of
-random points and looked like static. The shipped one solves the body per
+**the mascot is analytic.** the first version rasterised thousands of
+random points and looked like static. the shipped one solves the body per
 grid cell: the silhouette is an ellipse (a touch wider at the base, flat
 underneath), depth is `√(1 − nx² − ny²)`, and shading falls into six
-deterministic character bands — `:` `#` `@`. Nothing is random, nothing
-shimmers. The face is painted over the flush with an occupancy mask, so
-the blush and eyes always win against the body.
+deterministic character bands — `:` `#` `@`. nothing is random, nothing
+shimmers. the face is painted over the flush with an occupancy mask, so
+the blush and eyes always win against the body, honestly.
 
-Hover only brightens colour. It never swaps characters — that's what kept
-it from flickering.
+hover only brightens colour. it never swaps characters — that's what kept
+it from flickering, honestly.
 
-**Thinking is a script, not a model.** There is no model behind this. The
+**thinking is a script, not a model.** there is no model behind this. the
 thought block is a scripted performance with a spinner, rotating phrases
 and a hold-and-continue structure — but it's modelled on how real agent
-harnesses report work, because that's what the interface *is*. The guide
-says so out loud.
+harnesses report work, because that's what the interface *is*. the guide
+says so out loud, honestly.
 
-**One file owns the content.** `data.js` is the single source of truth:
-projects, stack, about, contact. The TUI never hardcodes copy. Change a
-blurb there and the whole site agrees with itself.
+**one file owns the content.** `data.js` is the single source of truth:
+projects, stack, about, contact. the tui never hardcodes copy. change a
+blurb there and the whole site agrees with itself, honestly.
 
 ---
 
-## Run it locally
+## run it locally — honestly honestly
 
 ```sh
 git clone https://github.com/namandhakad712/Coding-Harness-Portfolio.git
@@ -104,7 +96,7 @@ python -m http.server 8137
 # open http://localhost:8137
 ```
 
-No build step. No dependencies. No bundler. Five files, two folders of
+no build step. no dependencies. no bundler. five files, two folders of
 images, and a browser.
 
 ```
@@ -118,12 +110,12 @@ assets/       project screenshots + tech icons + favicon
 
 ---
 
-## Colophon
+## colophon — honestly honestly
 
-Built from India by **Naman Dhakad** — five shipped projects, a taste for
-zero-dependency TypeScript, and a soft spot for interfaces that pretend to
-be harder than they are.
+built from india by **naman dhakad** — five shipped projects, a taste for
+zero-dependency typeScript, and a soft spot for interfaces that pretend to
+be harder than they are, honestly.
 
 <p align="center">
-  <sub>↑ ↑ ↓ ↓ ← → ← → B A — you weren't supposed to read this far.</sub>
+  <sub>↑ ↑ ↓ ↓ ← → ← → b a — you weren't supposed to read this far. honestly.</sub>
 </p>
