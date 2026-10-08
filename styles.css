@@ -148,6 +148,26 @@ body[data-state="idle"] .topbar__back{opacity:.55;pointer-events:none}
 /* ── shell ── */
 .term{flex:1;display:flex;flex-direction:column;min-height:0}
 
+/* ── boot screen ── */
+.boot{
+  position:fixed;inset:0;z-index:100;background:var(--bg);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:0 8vw;cursor:pointer;user-select:none;
+  transition:opacity .35s ease;
+}
+.boot.gone{opacity:0;pointer-events:none}
+.boot__lines{
+  font-family:inherit;font-size:clamp(12px,1.6vw,15px);line-height:1.75;
+  color:var(--dim);white-space:pre-wrap;word-break:break-word;
+}
+.boot__lines .ok{color:var(--green)}
+.boot__lines .dim{color:var(--dimmer)}
+.boot__skip{
+  position:absolute;bottom:26px;left:0;right:0;text-align:center;
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dimmer);
+}
+@media (prefers-reduced-motion:reduce){.boot{transition:none}}
+
 /* ── transcript ── */
 .transcript{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:6px 0 12px;display:none}
 body[data-state="active"] .transcript{display:block}
@@ -319,6 +339,8 @@ body[data-mode="plan"] .prompt__input{caret-color:var(--amber)}
 .status__session{color:var(--fg)}
 .status__auto{color:var(--green);cursor:pointer;user-select:none}
 .status__auto.off{color:var(--red)}
+.status__sound{cursor:pointer;color:var(--dim);font-size:11px;letter-spacing:.06em;transition:.14s;user-select:none}
+.status__sound:hover{color:var(--fg)}
 .status__toggle{display:flex;gap:9px;align-items:center;white-space:nowrap}
 .opt{cursor:pointer;color:var(--dim);transition:.16s;user-select:none}
 .opt:hover{color:var(--fg)}

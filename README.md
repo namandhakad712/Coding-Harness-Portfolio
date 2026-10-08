@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="./assets/icon.svg" width="96" height="96" alt="peach mascot" />
-</p>
+<img src="./assets/icon.svg" width="96" height="96" alt="peach mascot" />
 
 <h1 align="center">Naman Dhakad — a portfolio that thinks it's a terminal</h1>
 
@@ -11,12 +9,7 @@
 
 ---
 
-<img width="1603" height="934" alt="image" src="https://github.com/user-attachments/assets/cc765271-385e-4eb2-a7e4-d64c4920d2ab" />
-
-There is no long scrolling page here. You type a command, a thought block
-opens and streams its reasoning, then the answer arrives — screenshots,
-stack, links — as if a model were generating it live. Everything is local,
-scripted and honest about being scripted.
+Ok so basically this isnt one of those never-ending scroll pages. U type a command, a thought block pops open, streams some reasoning, then the answer drops — screenshots, stack, links included. Everything runs locally, no backend, no model generating things live. Its just me, this repo, and a browser.
 
 ---
 
@@ -44,7 +37,6 @@ scripted and honest about being scripted.
 /history   everything you've asked so far
 /undo      step back one answer
 /clear     start fresh
-```
 
 Keyboard: `/` opens the menu · `↑` `↓` browse · `Tab` cycle · `Enter` run ·
 `Esc` cancel or close · `?` reopens the guide.
@@ -53,7 +45,7 @@ Keyboard: `/` opens the menu · `↑` `↓` browse · `Tab` cycle · `Enter` run
 
 ## Things you weren't told about
 
-A terminal that hides nothing isn't a terminal. These are **not** in the
+A terminal that hides nothing isnt a terminal. These are **not** in the
 help list, the menu, or anywhere else:
 
 ```sh
@@ -75,10 +67,10 @@ And the oldest cheat code in the book still works here:
 ## Design notes
 
 **No AI slop.** The palettes are the real ones — Dracula's `#282a36`,
-Nord's polar night, Gruvbox's `#282828` groove — not "a dark theme" and
-"another dark theme". Phrases in the thinking blocks are written to vary:
-every block shuffles its own word order from a random offset, so two runs
-of the same command never read the same.
+Nord's polar night, Gruvbox's `#282828` groove — not "a dark theme"
+and "another dark theme". Phrases in the thinking blocks are written to
+vary: every block shuffles its own word order from a random offset, so two
+runs of the same command never read the same.
 
 **The mascot is analytic.** The first version rasterised thousands of
 random points and looked like static. The shipped one solves the body per
@@ -91,7 +83,7 @@ the blush and eyes always win against the body.
 Hover only brightens colour. It never swaps characters — that's what kept
 it from flickering.
 
-**Thinking is a lie you agreed to.** There is no model behind this. The
+**Thinking is a script, not a model.** There is no model behind this. The
 thought block is a scripted performance with a spinner, rotating phrases
 and a hold-and-continue structure — but it's modelled on how real agent
 harnesses report work, because that's what the interface *is*. The guide
