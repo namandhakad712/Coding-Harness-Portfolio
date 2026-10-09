@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Naman Dhakad — Terminal</title>
-<meta name="description" content="Naman Dhakad — web developer from India. A terminal portfolio: type / to explore five shipped projects, the stack, and how to get in touch." />
+<meta name="description" content="Naman Dhakad — web dev from India. A terminal portfolio: type / to explore five shipped projects, the stack, and how to get in touch." />
 <meta name="author" content="Naman Dhakad" />
 <meta name="theme-color" content="#0a0a0b" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,7 +16,9 @@
 </head>
 <body data-theme="harness" data-state="idle">
 
-<!-- boot screen, js fills the lines -->
+<!-- boot screen, js fills the lines. looks cool imo.
+     TODO: make the boot text more realistic later -->
+<!-- also the aria stuff might be wrong but whatever -->
 <div class="boot" id="boot" aria-hidden="true">
   <pre class="boot__lines" id="bootLines"></pre>
   <div class="boot__skip">click anywhere to skip</div>
@@ -33,10 +35,10 @@
 
 <main class="term">
 
-  <!-- transcript (active session) -->
+  <!-- transcript (active session) — jahan saari baatien dikhayi deti hain -->
   <div class="transcript" id="transcript" aria-live="polite" aria-label="Session transcript"></div>
 
-  <!-- idle hero -->
+  <!-- idle hero — jab kuchh nahi ho toh yeh dikhaye -->
   <div class="idle" id="idle">
     <canvas id="mascot" class="mascot" aria-label="Interactive 3D ASCII mascot — move your cursor"></canvas>
     <h1 class="idle__q">What can I do for you?</h1>
@@ -50,7 +52,7 @@
     </div>
   </div>
 
-  <!-- prompt -->
+  <!-- prompt — jahan user type karta h -->
   <div class="prompt" id="prompt">
     <span class="prompt__chevron" id="chev">&gt;</span>
     <input id="cmd" class="prompt__input" type="text" autocomplete="off" spellcheck="false"
@@ -58,7 +60,7 @@
     <div class="menu" id="menu" role="listbox" hidden></div>
   </div>
 
-  <!-- status bar -->
+  <!-- status bar — neeche wala info strip -->
   <div class="status" id="status">
     <div class="status__row">
       <span class="status__session">naman<span class="dim">@portfolio</span> <span class="dim">— interactive demo, nothing is sent anywhere</span></span>
@@ -80,7 +82,7 @@
 
 </main>
 
-<!-- beginner guide -->
+<!-- beginner guide — agar koi pehli baar aaya ho -->
 <div class="guide" id="guide" hidden>
   <div class="guide__box" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
     <div class="guide__hd">
@@ -114,7 +116,7 @@
   </div>
 </div>
 
-<!-- toast -->
+<!-- toast — temporary notifications -->
 <div class="toast" id="toast" hidden><span class="spin">⠋</span> <span id="toastText">One moment…</span></div>
 
 <script src="./ascii3d.js"></script>

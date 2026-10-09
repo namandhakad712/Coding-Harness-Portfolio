@@ -1,8 +1,8 @@
-# Reference material used to design the site — not part of the site
+# reference material used to design the site — not part of the site itself
 _ref/
 *.mp4
 
-# OS / editor
+# os / editor stuff jo ignore karni hain
 .DS_Store
 Thumbs.db
 *.log

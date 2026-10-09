@@ -1,20 +1,21 @@
 # yo 👋
 
-so you ended up here. cool.
+so like u ended up here. cool.
 
-this is my portfolio. but like.. not a normal one. there is no "scroll down for 40 mins and read my life story" here. u type stuff, it thinks (pretends to think idk), then it gives u the answer. kinda like chatgpt but dumb and honest about beeing dumb.
+this is my portfolio but like... not a normal one lol. koi "scroll down for 40 mins and read my life story" wala nahi h ye. u type stuff, it thinks (pretends to think idk), then gives u the answer. kinda like chatgpt but dumb and honest about being dumb.
 
 **live site:** https://namandhakad712.github.io/Coding-Harness-Portfolio/
+**raw README:** https://raw.githubusercontent.com/namandhakad712/Coding-Harness-Portfolio/refs/heads/main/README.md
 
 ---
 
 ## why did i even make this
 
-boredom mostly. also every other portfolio looks same same yaar. hero section, "hi i am X", gradient blob, scroll scroll, footer. i fell asleep mid click on one of those last year and decided im never making one of those.
+boredom mostly. plus har dusre portfolio lagte h same same yaar. hero section, "hi i am X", gradient blob, scroll scroll, footer. i fell asleep mid click on one of those last year and i was like "never again bro".
 
 so this one pretends to be a terminal. u get a blinking cursor thing, u type commands, it responds. thats it. thats the whole gimmick.
 
-oh and theres a peach. a round ascii peach that follows ur mouse around. dont ask why. i was sleep deprived ok.
+oh and there's a peach. a round ascii peach that follows ur mouse around. dont ask why. i was sleep deprived ok 😭
 
 ---
 
@@ -23,42 +24,42 @@ oh and theres a peach. a round ascii peach that follows ur mouse around. dont as
 try these first:
 
 ```
-/work     <- shows my 5 projects, with pics and links
-/craft    <- what tools i use, explained normal person style
-/about    <- who i am, short version
-/contact  <- email + github + linkedin in one go
-/help     <- if ur lost, this helps
-/theme    <- 16 colour schemes, click n it saves
-/history  <- everything u asked till now
-/undo     <- go back one answer
-/clear    <- wipe it all
+/work     <- shows my 5 projects with pics and links
+/craft    <- what tools i use in normal person language
+/about    <- whoami short version
+/contact  <- email + github + linkedin ek saath
+/help     <- if u r lost this helps lol
+/theme    <- 16 colour schemes click karke switch hota h
+/history  <- sab kuchh jo tune poocha
+/undo     <- ek answer piche jao
+/clear    <- sab erase kar do
 ```
 
 keyboard stuff:
 - `/` opens the menu
-- `up` `down` arrows to scroll through stuff
+- `up` `down` arrows se scroll karo
 - `tab` cycles options
 - `enter` runs it
-- `esc` cancels whatever is happening
-- `?` opens the beginner guide thing if u forgot
+- `esc` cancels kuchh bhi jo chal raha h
+- `?` opens the beginner guide agar bhool gaye ho
 
-also u can just type normal sentences like "show me ur work" or "are u available for hire" and it will still understand. theres a small router thing behind it, its not actually ai, dont get too excited.
+also u can just normal sentences bhi typed like "show me ur work" ya "are u available for hire" and it'll still understand. theres a small router behind it, its not actually ai, dont get too excited 😅
 
 ---
 
 ## hidden stuff (not in help menu on purpose)
 
-real terminals have secrets. so does this one. i aint listing these in /help, u gotta just... know. or read this i guess lol
+real terminals have secrets. so does this one. i aint listing these in /help u gotta just... know. or read this i guess lol
 
 ```
 /coffee   -> the most important command humanity ever made
-/sudo     -> u dont have permission and u never will
+/sudo     -> u dont have permission and u never will 💀
 /42       -> yes. that 42.
 /xyzzy    -> literally nothing happens. correct response btw
 /rm       -> it says no. politely. i like my files
 ```
 
-and this one still works if ur a real one:
+and this konami code one bhi still works agar tum real ho:
 
 ```
 ↑ ↑ ↓ ↓ ← → ← → B A
@@ -70,22 +71,22 @@ try it. i dare u.
 
 ## how it works (simplified so even i can understand it later)
 
-no backend. no server. no database. nothing is being stored or sent anywhere. everything happens inside ur browser tab and thats it. close the tab and its gone forever like my attention span.
+no backend. no server. no database. kuchh bhi store ya send nahi hota. sab tumhare browser tab ke andar chalta h. tab band karo toh sab kuchh gone forever jaise mera attention span.
 
-the "thinking" part that opens before every answer — thats scripted. i wrote out a bunch of phrases and it shuffles them randomly so no two runs look same. its not a real model doing anything, its just vibes. the guide popup says this out loud too so im not tricking nobody.
+"thinking" part jo har answer se pehle open hota h — thats scripted. maine kuchh phrases likh diye hain aur yeh randomly shuffle karta h jisse koi bhi do runs same nahi lagte. its not a real model doing anything, its just vibes. guide popup bhi yehi kehta h so maine kuchh bhi nahi chhipaya.
 
 files basically:
 
 ```
-index.html     -> the page shell, starts everything
-styles.css     -> colours + layout, 16 themes in there
-tui.js         -> the actual terminal logic, commands, streaming, eggs
+index.html     -> page ka shell, sab kuchh start karta h
+styles.css     -> colours + layout, 16 themes yehin h
+tui.js         -> actual terminal logic, commands, streaming, eggs
 ascii3d.js     -> draws the peach mascot thing
-data.js        -> all the text content lives here and nowhere else
-assets/        -> screenshots of projects + tech icons
+data.js        -> saara text content yahi h kahin aur nahi
+assets/        -> project screenshots + tech icons
 ```
 
-if u wanna change any text on the site, just open data.js. u dont need to touch anything else. i kept it separate so future me doesnt cry.
+agar koi text change karna ho to bas data.js khol lo. kuchh aur touch nahi karne ki zaroorat. maine alag rakh diya taki future mei mera na roye 🥲
 
 ---
 
@@ -97,42 +98,42 @@ cd Coding-Harness-Portfolio
 python -m http.server 8137
 ```
 
-then open http://localhost:8137 and thats it. no npm install, no node_modules folder the size of my backlog, no build step. literally just files sitting there being useful.
+then open http://localhost:8137 and done. no npm install, no node_modules folder jo meri backlog jitna bada ho, no build step. literally bas files khadi hain wohi kaam karti hain.
 
 ---
 
-## the peach situation
+## the peach situation 🍑
 
-ok so theres this round peach drawn in ascii characters on the side. it:
+ok so there's this round peach drawn in ascii characters on the side. it:
 
-- follows ur cursor when u move the mouse
+- follows ur cursor jab tum mouse chalate ho
 - blinks sometimes
 - breathes (subtle size change yeah)
-- bounces if u click it
+- bounces agar tum click karo
 - has a little shine in its eyes
 
-first version of it looked like tv static cause i was generating random points. looked horrible. rewrote the whole thing to calculate each cell properly — ellipse shape, depth maths, shading from 6 characters. now it looks like an actual peach and not noise. hover only changes the colour now, never the character, otherwise it flickers like crazy and hurts ur eyes.
+first version it tv static jaisa lag raha tha kyuki main random points generate kar raha tha. bahut bura lag raha tha. poori tarah se rewrite kar diya to calculate each cell properly — ellipse shape, depth maths, 6 characters se shading. ab ek real peach lag raha h aur noise nahi. hover sirf colour change karta h kabhi character nahi, warna flicker karta h bahut bura lagta h aur aankh dard hoti h.
 
 ---
 
 ## things i used
 
-react, next, typescript, vue, tailwind, gsap, node, some cloudflare workers, python for small stuff. full list if u type `/craft` on the site.
+react, next, typescript, vue, tailwind, gsap, node, thoda sa cloudflare workers, python for small stuff. puri list agar tum /craft dabao ge toh milti h.
 
-basically whatever gets the job done without me wanting to throw my laptop out the window.
+basically jo bhi kaam kare without me wanting to throw my laptop out the window.
 
 ---
 
 ## about me short ver
 
-**naman dhakad** — web dev from india. i build stuff that feels good to use. i care about the small interactions, the ones most ppl dont even notice but somehow make a site feel "right".
+**naman dhakad** — web dev from india. main wohi banna pasand karta h jo use karo toh achha lagta h. main chhote interactions par dhyan deta hoon, jinhe logo notice nahi karte but kuchh aisa banate hain ki website "right" lagti h.
 
-if u wanna talk: `hey@naman.is-a.dev`
+agar tumhara kehna ho: `hey@naman.is-a.dev`
 
-im usually online lol. reply fast unless im sleeping or in class.
+i m usually online lol. mjhe reply fast aata h unless main so raha hoon ya class mei hoon.
 
 ---
 
 <p align="center">
-  <sub>↑ ↑ ↓ ↓ ← → ← → B A — u were not supposed to read this far but i appreciate u did 🫡</sub>
+  <sub>↑ ↑ ↓ ↓ ← → ← → B A — tum yahan tak padh ke aaye ho par main appreciate kar raha hoon 🫡</sub>
 </p>
