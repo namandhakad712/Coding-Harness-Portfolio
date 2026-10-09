@@ -8,6 +8,7 @@
 
 // TODO: update wordsearch screenshot its from 2023 and looks bad fr
 // also i should probably fix the smart mailto repo link idk
+// brb sleep deprived as hell rn but shipping anyway fr
 
 // projects i shipped. oldest to newest. nahi toh koi baat nahi
 const PROJECTS = [
